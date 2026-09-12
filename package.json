@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "dev": "concurrently \"cd backend && npm start\" \"cd frontend && npm start\" \"cd dashboard && npm start\""
+    "dev": "concurrently \"cd backend && npm start\" \"cd frontend && npm start\""
   },
   "dependencies": {
     "concurrently": "10.0.5"
