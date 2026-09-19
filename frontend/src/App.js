@@ -5,6 +5,15 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import Navbar from "./components/Navbar";
 import Dashboard from "./components/Dashboard/Dashboard";
 import { hybridOrdersAPI, hybridHoldingsAPI, hybridPositionsAPI } from "./services/hybridDataService";
+import { PortfolioAnalytics } from "./components/PortfolioAnalytics";
+import { Watchlist } from "./components/WatchList";
+import { StockSearch } from "./components/StockSearch";
+import { StockScreener } from "./components/StockScreener";
+import { BenchmarkComparison } from "./components/BenchmarkComparison";
+import { AITradingAssistant } from "./components/AITradingAssistant";
+import { RealTimePrices } from "./components/RealTimePrices";
+import { TechnicalIndicators } from "./components/TechnicalIndicators";
+import { AdvancedOrders } from "./components/AdvancedOrders";
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
@@ -25,7 +34,7 @@ function Home() {
         background: `linear-gradient(135deg, ${colors.primary}20 0%, ${colors.primary}10 100%)`,
       }}>
         <h1 style={{ fontSize: "48px", fontWeight: "bold", marginBottom: "1rem", color: colors.text }}>
-          💰 TradePro
+          💰 MarketMastery
         </h1>
         <p style={{ fontSize: "18px", color: colors.textSecondary, marginBottom: "2rem" }}>
           Professional stock trading platform
@@ -401,6 +410,57 @@ const AppContent = () => {
         <Route path="/holdings" element={<ProtectedRoute><Holdings /></ProtectedRoute>} />
         <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
         <Route path="/positions" element={<ProtectedRoute><Positions /></ProtectedRoute>} />
+        <Route path="/watchlist" element={<ProtectedRoute><Watchlist /></ProtectedRoute>} />
+        <Route path="/search" element={<ProtectedRoute><StockSearch /></ProtectedRoute>} />
+        <Route path="/analytics" element={<ProtectedRoute><PortfolioAnalytics /></ProtectedRoute>} />
+              <Route
+          path="/screener"
+          element={
+            <ProtectedRoute>
+              <StockScreener />
+            </ProtectedRoute>
+          }
+        />
+              <Route
+          path="/benchmark"
+          element={
+            <ProtectedRoute>
+              <BenchmarkComparison />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ai-assistant"
+          element={
+            <ProtectedRoute>
+              <AITradingAssistant />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+  path="/prices"
+  element={
+    <ProtectedRoute>
+      <RealTimePrices />
+    </ProtectedRoute>
+  }
+/>
+<Route
+  path="/indicators"
+  element={
+    <ProtectedRoute>
+      <TechnicalIndicators />
+    </ProtectedRoute>
+  }
+/>
+<Route
+  path="/advanced-orders"
+  element={
+    <ProtectedRoute>
+      <AdvancedOrders />
+    </ProtectedRoute>
+  }
+/>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>
@@ -417,4 +477,4 @@ export default function App() {
       </AuthProvider>
     </ThemeProvider>
   );
-}
+} 

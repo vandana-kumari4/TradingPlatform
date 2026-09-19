@@ -9,9 +9,11 @@ import Home from "./pages/Home";
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
 import Dashboard from "./components/Dashboard/Dashboard";
+import { Watchlist } from "./components/Watchlist";
 import Holdings from "./pages/Holdings";
 import Orders from "./pages/Orders";
 import Positions from "./pages/Positions";
+import { StockSearch } from "./components/StockSearch";
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -72,12 +74,29 @@ const AppContent = () => {
               <Orders />
             </ProtectedRoute>
           }
-        />
+            />
         <Route
           path="/positions"
           element={
             <ProtectedRoute>
               <Positions />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/search" element={<StockSearch />} />
+        <Route
+          path="/watchlist"
+          element={
+            <ProtectedRoute>
+              <Watchlist />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/search"
+          element={
+            <ProtectedRoute>
+              <StockSearch />
             </ProtectedRoute>
           }
         />

@@ -1,177 +1,244 @@
-import React, { useState, useContext } from "react";
+import React, { useState } from "react";
+import { useTheme } from "../context/ThemeContext";
+import { StockPrice } from "./StockPrice";
+import { BuySellModal } from "./BuySellModal";
 
-import axios from "axios";
+export const Watchlist = () => {
+  const { colors } = useTheme();
+  const [watchlist, setWatchlist] = useState([
+    { name: "INFY", price: 1550, change: 150, changePercent: 10.71, isDown: false },
+    { name: "TCS", price: 3400, change: 200, changePercent: 6.25, isDown: false },
+    { name: "HDFCBANK", price: 1550, change: 50, changePercent: 3.33, isDown: false },
+    { name: "WIPRO", price: 450, change: -20, changePercent: -4.26, isDown: true },
+    { name: "RELIANCE", price: 2100, change: 100, changePercent: 5.0, isDown: false },
+  ]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedStock, setSelectedStock] = useState(null);
+  const [modalType, setModalType] = useState("BUY");
+  const [hoveredStock, setHoveredStock] = useState(null);
 
-import GeneralContext from "./GeneralContext";
+  const filteredWatchlist = watchlist.filter((stock) =>
+    stock.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-import { Tooltip, Grow } from "@mui/material";
-
-import {
-  BarChartOutlined,
-  KeyboardArrowDown,
-  KeyboardArrowUp,
-  MoreHoriz,
-} from "@mui/icons-material";
-
-import { watchlist } from "../data/data";
-import { DoughnutChart } from "./DoughnoutChart";
-
-const labels = watchlist.map((subArray) => subArray["name"]);
-
-const WatchList = () => {
-  const data = {
-    labels,
-    datasets: [
-      {
-        label: "Price",
-        data: watchlist.map((stock) => stock.price),
-        backgroundColor: [
-          "rgba(255, 99, 132, 0.5)",
-          "rgba(54, 162, 235, 0.5)",
-          "rgba(255, 206, 86, 0.5)",
-          "rgba(75, 192, 192, 0.5)",
-          "rgba(153, 102, 255, 0.5)",
-          "rgba(255, 159, 64, 0.5)",
-        ],
-        borderColor: [
-          "rgba(255, 99, 132, 1)",
-          "rgba(54, 162, 235, 1)",
-          "rgba(255, 206, 86, 1)",
-          "rgba(75, 192, 192, 1)",
-          "rgba(153, 102, 255, 1)",
-          "rgba(255, 159, 64, 1)",
-        ],
-        borderWidth: 1,
-      },
-    ],
+  const removeFromWatchlist = (symbol) => {
+    setWatchlist(watchlist.filter((s) => s.name !== symbol));
   };
 
-  // export const data = {
-  //   labels: ["Red", "Blue", "Yellow", "Green", "Purple", "Orange"],
-  // datasets: [
-  //   {
-  //     label: "# of Votes",
-  //     data: [12, 19, 3, 5, 2, 3],
-  //     backgroundColor: [
-  //       "rgba(255, 99, 132, 0.2)",
-  //       "rgba(54, 162, 235, 0.2)",
-  //       "rgba(255, 206, 86, 0.2)",
-  //       "rgba(75, 192, 192, 0.2)",
-  //       "rgba(153, 102, 255, 0.2)",
-  //       "rgba(255, 159, 64, 0.2)",
-  //     ],
-  //     borderColor: [
-  //       "rgba(255, 99, 132, 1)",
-  //       "rgba(54, 162, 235, 1)",
-  //       "rgba(255, 206, 86, 1)",
-  //       "rgba(75, 192, 192, 1)",
-  //       "rgba(153, 102, 255, 1)",
-  //       "rgba(255, 159, 64, 1)",
-  //     ],
-  //     borderWidth: 1,
-  //   },
-  // ],
-  // };
+  const openBuyModal = (symbol) => {
+    setSelectedStock(symbol);
+    setModalType("BUY");
+  };
+
+  const openSellModal = (symbol) => {
+    setSelectedStock(symbol);
+    setModalType("SELL");
+  };
+
+  const containerStyle = {
+    backgroundColor: colors.background,
+    minHeight: "100vh",
+    padding: "2rem",
+  };
+
+  const searchContainerStyle = {
+    marginBottom: "2rem",
+    display: "flex",
+    gap: "1rem",
+    alignItems: "center",
+  };
+
+  const searchInputStyle = {
+    flex: 1,
+    padding: "0.75rem 1rem",
+    borderRadius: "6px",
+    border: `1px solid ${colors.border}`,
+    backgroundColor: colors.surface,
+    color: colors.text,
+    fontSize: "14px",
+  };
+
+  const countStyle = {
+    color: colors.textSecondary,
+    fontWeight: "600",
+    fontSize: "14px",
+  };
+
+  const listContainerStyle = {
+    backgroundColor: colors.surface,
+    border: `1px solid ${colors.border}`,
+    borderRadius: "12px",
+    overflow: "hidden",
+  };
+
+  const headerStyle = {
+    display: "grid",
+    gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr",
+    gap: "1rem",
+    padding: "1rem 1.5rem",
+    backgroundColor: colors.surfaceLight,
+    borderBottom: `1px solid ${colors.border}`,
+    fontWeight: "600",
+    fontSize: "12px",
+    color: colors.textSecondary,
+    textTransform: "uppercase",
+  };
+
+  const itemStyle = {
+    display: "grid",
+    gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr",
+    gap: "1rem",
+    padding: "1rem 1.5rem",
+    borderBottom: `1px solid ${colors.border}`,
+    alignItems: "center",
+    cursor: "pointer",
+    backgroundColor: hoveredStock === null ? colors.surface : colors.surface,
+    transition: "background-color 0.2s",
+  };
+
+  const stockNameStyle = {
+    fontWeight: "600",
+    color: colors.text,
+    fontSize: "14px",
+  };
+
+  const priceStyle = {
+    color: colors.text,
+    fontWeight: "600",
+  };
+
+  const changeStyle = (isDown) => ({
+    color: isDown ? colors.danger : colors.success,
+    fontWeight: "600",
+    fontSize: "14px",
+  });
+
+  const actionsStyle = {
+    display: "flex",
+    gap: "0.5rem",
+  };
+
+  const buyButtonStyle = {
+    padding: "0.5rem 1rem",
+    borderRadius: "4px",
+    border: "none",
+    backgroundColor: colors.success,
+    color: "white",
+    cursor: "pointer",
+    fontSize: "12px",
+    fontWeight: "600",
+  };
+
+  const sellButtonStyle = {
+    padding: "0.5rem 1rem",
+    borderRadius: "4px",
+    border: "none",
+    backgroundColor: colors.danger,
+    color: "white",
+    cursor: "pointer",
+    fontSize: "12px",
+    fontWeight: "600",
+  };
+
+  const removeButtonStyle = {
+    padding: "0.5rem 0.75rem",
+    borderRadius: "4px",
+    border: `1px solid ${colors.border}`,
+    backgroundColor: "transparent",
+    color: colors.textSecondary,
+    cursor: "pointer",
+    fontSize: "12px",
+    fontWeight: "600",
+  };
 
   return (
-    <div className="watchlist-container">
-      <div className="search-container">
+    <div style={containerStyle}>
+      <h1 style={{ color: colors.text, marginBottom: "1.5rem" }}>My Watchlist</h1>
+
+      {/* Search */}
+      <div style={searchContainerStyle}>
         <input
           type="text"
-          name="search"
-          id="search"
-          placeholder="Search eg:infy, bse, nifty fut weekly, gold mcx"
-          className="search"
+          placeholder="Search eg: INFY, TCS, HDFCBANK"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          style={searchInputStyle}
         />
-        <span className="counts"> {watchlist.length} / 50</span>
+        <span style={countStyle}>
+          {filteredWatchlist.length} / {watchlist.length}
+        </span>
       </div>
 
-      <ul className="list">
-        {watchlist.map((stock, index) => {
-          return <WatchListItem stock={stock} key={index} />;
-        })}
-      </ul>
+      {/* Watchlist Table */}
+      <div style={listContainerStyle}>
+        <div style={headerStyle}>
+          <div>Stock</div>
+          <div>Last Price</div>
+          <div>Change</div>
+          <div>% Change</div>
+          <div>Actions</div>
+        </div>
 
-      <DoughnutChart data={data} />
+        {filteredWatchlist.length > 0 ? (
+          filteredWatchlist.map((stock) => (
+            <div
+              key={stock.name}
+              style={{
+                ...itemStyle,
+                backgroundColor:
+                  hoveredStock === stock.name ? colors.surfaceLight : colors.surface,
+              }}
+              onMouseEnter={() => setHoveredStock(stock.name)}
+              onMouseLeave={() => setHoveredStock(null)}
+            >
+              <div style={stockNameStyle}>{stock.name}</div>
+              <div style={priceStyle}>₹{stock.price}</div>
+              <div style={changeStyle(stock.isDown)}>
+                {stock.isDown ? "−" : "+"}₹{Math.abs(stock.change)}
+              </div>
+              <div style={changeStyle(stock.isDown)}>
+                {stock.isDown ? "−" : "+"}
+                {Math.abs(stock.changePercent)}%
+              </div>
+              <div style={actionsStyle}>
+                <button
+                  onClick={() => openBuyModal(stock.name)}
+                  style={buyButtonStyle}
+                >
+                  Buy
+                </button>
+                <button
+                  onClick={() => openSellModal(stock.name)}
+                  style={sellButtonStyle}
+                >
+                  Sell
+                </button>
+                <button
+                  onClick={() => removeFromWatchlist(stock.name)}
+                  style={removeButtonStyle}
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div style={{ padding: "2rem", textAlign: "center", color: colors.textSecondary }}>
+            No stocks found
+          </div>
+        )}
+      </div>
+
+      {/* Buy/Sell Modal */}
+      {selectedStock && (
+        <BuySellModal
+          symbol={selectedStock}
+          type={modalType}
+          onClose={() => setSelectedStock(null)}
+        />
+      )}
     </div>
   );
 };
 
-export default WatchList;
-
-const WatchListItem = ({ stock }) => {
-  const [showWatchlistActions, setShowWatchlistActions] = useState(false);
-
-  const handleMouseEnter = (e) => {
-    setShowWatchlistActions(true);
-  };
-
-  const handleMouseLeave = (e) => {
-    setShowWatchlistActions(false);
-  };
-
-  return (
-    <li onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-      <div className="item">
-        <p className={stock.isDown ? "down" : "up"}>{stock.name}</p>
-        <div className="itemInfo">
-          <span className="percent">{stock.percent}</span>
-          {stock.isDown ? (
-            <KeyboardArrowDown className="down" />
-          ) : (
-            <KeyboardArrowUp className="down" />
-          )}
-          <span className="price">{stock.price}</span>
-        </div>
-      </div>
-      {showWatchlistActions && <WatchListActions uid={stock.name} />}
-    </li>
-  );
-};
-
-const WatchListActions = ({ uid }) => {
-  const generalContext = useContext(GeneralContext);
-
-  const handleBuyClick = () => {
-    generalContext.openBuyWindow(uid);
-  };
-
-  return (
-    <span className="actions">
-      <span>
-        <Tooltip
-          title="Buy (B)"
-          placement="top"
-          arrow
-          TransitionComponent={Grow}
-          onClick={handleBuyClick}
-        >
-          <button className="buy">Buy</button>
-        </Tooltip>
-        <Tooltip
-          title="Sell (S)"
-          placement="top"
-          arrow
-          TransitionComponent={Grow}
-        >
-          <button className="sell">Sell</button>
-        </Tooltip>
-        <Tooltip
-          title="Analytics (A)"
-          placement="top"
-          arrow
-          TransitionComponent={Grow}
-        >
-          <button className="action">
-            <BarChartOutlined className="icon" />
-          </button>
-        </Tooltip>
-        <Tooltip title="More" placement="top" arrow TransitionComponent={Grow}>
-          <button className="action">
-            <MoreHoriz className="icon" />
-          </button>
-        </Tooltip>
-      </span>
-    </span>
-  );
-};
+export default Watchlist;

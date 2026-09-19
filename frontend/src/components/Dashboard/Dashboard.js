@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useTheme } from "../../context/ThemeContext";
 import { hybridHoldingsAPI, hybridOrdersAPI, hybridPositionsAPI } from "../../services/hybridDataService";
+import { StockPrice } from "../StockPrice";
+import { StockChart } from "../StockChart";
 
 export const Dashboard = () => {
   const { colors } = useTheme();
@@ -104,6 +106,22 @@ export const Dashboard = () => {
         </div>
       </div>
 
+      {/* Real Stock Prices */}
+      <div style={{ marginBottom: "2rem" }}>
+        <h2 style={{ color: colors.text, marginBottom: "1rem" }}>Stock Prices</h2>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1rem" }}>
+          <StockPrice symbol="INFY" />
+          <StockPrice symbol="TCS" />
+          <StockPrice symbol="HDFCBANK" />
+          <StockPrice symbol="WIPRO" />
+        </div>
+      </div>
+
+      {/* Stock Charts */}
+      <StockChart symbol="INFY" height={350} />
+      <StockChart symbol="TCS" height={350} />
+      <StockChart symbol="HDFCBANK" height={350} />
+
       <div style={cardStyle}>
         <h2 style={{ color: colors.text, marginBottom: "1rem" }}>Your Holdings</h2>
         {holdings.length > 0 ? (
@@ -162,19 +180,20 @@ export const Dashboard = () => {
                     <td style={cellStyle}><strong>{o.name}</strong></td>
                     <td style={{
                       ...cellStyle,
-                      color: o.mode === "BUY" ? colors.success : colors.danger,
+                      color: o.type === "BUY" ? colors.success : colors.danger,
                       fontWeight: "600",
-                    }}>{o.mode}</td>
+                    }}>
+                      {o.type}
+                    </td>
                     <td style={cellStyle}>{o.qty}</td>
                     <td style={cellStyle}>₹{o.price}</td>
-                    <td style={cellStyle}>
-                      <span style={{
-                        backgroundColor: o.status === "COMPLETED" ? colors.success : colors.warning,
-                        color: "white",
-                        padding: "0.25rem 0.75rem",
-                        borderRadius: "4px",
-                        fontSize: "12px",
-                      }}>{o.status}</span>
+                    <td style={{
+                      ...cellStyle,
+                      backgroundColor: o.status === "COMPLETED" ? colors.successLight : colors.warningLight,
+                      color: o.status === "COMPLETED" ? colors.success : colors.warning,
+                      fontWeight: "600",
+                    }}>
+                      {o.status}
                     </td>
                   </tr>
                 ))}
@@ -183,6 +202,44 @@ export const Dashboard = () => {
           </div>
         ) : (
           <div style={{ color: colors.textSecondary }}>No orders yet</div>
+        )}
+      </div>
+
+      <div style={cardStyle}>
+        <h2 style={{ color: colors.text, marginBottom: "1rem" }}>Positions</h2>
+        {positions.length > 0 ? (
+          <div style={{ overflowX: "auto" }}>
+            <table style={tableStyle}>
+              <thead style={{ backgroundColor: colors.surfaceLight }}>
+                <tr>
+                  <th style={cellStyle}>Stock</th>
+                  <th style={cellStyle}>Qty</th>
+                  <th style={cellStyle}>Avg Price</th>
+                  <th style={cellStyle}>Mark Price</th>
+                  <th style={cellStyle}>P&L</th>
+                </tr>
+              </thead>
+              <tbody>
+                {positions.map((p) => (
+                  <tr key={p._id}>
+                    <td style={cellStyle}><strong>{p.name}</strong></td>
+                    <td style={cellStyle}>{p.qty}</td>
+                    <td style={cellStyle}>₹{p.avgPrice}</td>
+                    <td style={cellStyle}>₹{p.markPrice}</td>
+                    <td style={{
+                      ...cellStyle,
+                      color: p.pnl >= 0 ? colors.success : colors.danger,
+                      fontWeight: "600",
+                    }}>
+                      {p.pnl >= 0 ? "+" : ""}{p.pnl}%
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div style={{ color: colors.textSecondary }}>No positions yet</div>
         )}
       </div>
     </div>

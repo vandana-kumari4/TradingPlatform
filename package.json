@@ -3,6 +3,7 @@
     "dev": "concurrently \"cd backend && npm start\" \"cd frontend && npm start\""
   },
   "dependencies": {
-    "concurrently": "10.0.5"
+    "concurrently": "10.0.5",
+    "recharts": "^3.10.1"
   }
 }
