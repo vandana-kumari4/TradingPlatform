@@ -79,6 +79,10 @@ export const Navbar = () => {
           <a onClick={() => navigate("/prices")} style={linkStyle}>📊 Prices</a>
           <a onClick={() => navigate("/indicators")} style={linkStyle}>📈 Indicators</a>
           <a onClick={() => navigate("/advanced-orders")} style={linkStyle}>🎯 Orders</a>
+          <a onClick={() => navigate("/profile")} style={linkStyle}>👤 Profile</a>
+<a onClick={() => navigate("/leaderboard")} style={linkStyle}>🏆 Leaderboard</a>
+<a onClick={() => navigate("/notifications")} style={linkStyle}>🔔 Alerts</a>
+<a onClick={() => navigate("/paper-trading")} style={linkStyle}>📈 Paper Trading</a>
           <button 
             onClick={toggleTheme} 
             style={{ 
@@ -167,6 +171,7 @@ export const Navbar = () => {
             <a onClick={() => { navigate("/watchlist"); setMenuOpen(false); }} style={linkStyle}>Watchlist</a>
             <a onClick={() => { navigate("/search"); setMenuOpen(false); }} style={linkStyle}>Search</a>
                         <a onClick={() => { navigate("/advanced-orders"); setMenuOpen(false); }} style={linkStyle}>🎯 Orders</a>
+                        <a onClick={() => { navigate("/paper-trading"); setMenuOpen(false); }} style={linkStyle}>📈 Paper Trading</a>
           </div>
 
           {/* Portfolio Section */}
@@ -202,9 +207,10 @@ export const Navbar = () => {
             <a onClick={() => { navigate("/ai-assistant"); setMenuOpen(false); }} style={linkStyle}>🤖 AI Assistant</a>
             <a onClick={() => { navigate("/prices"); setMenuOpen(false); }} style={linkStyle}>📊 Prices</a>
             <a onClick={() => { navigate("/indicators"); setMenuOpen(false); }} style={linkStyle}>📈 Indicators</a>
+            <a onClick={() => { navigate("/notifications"); setMenuOpen(false); }} style={linkStyle}>🔔 Alerts</a>
           </div>
 
-          {/* Account Section */}
+            {/* Account Section */}
           <div>
             <div style={{ 
               color: colors.textSecondary, 
@@ -215,6 +221,8 @@ export const Navbar = () => {
             }}>
               Account
             </div>
+            <a onClick={() => { navigate("/profile"); setMenuOpen(false); }} style={linkStyle}>👤 Profile</a>
+            <a onClick={() => { navigate("/leaderboard"); setMenuOpen(false); }} style={linkStyle}>🏆 Leaderboard</a>
             <button 
               onClick={handleLogout} 
               style={{

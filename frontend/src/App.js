@@ -14,6 +14,11 @@ import { AITradingAssistant } from "./components/AITradingAssistant";
 import { RealTimePrices } from "./components/RealTimePrices";
 import { TechnicalIndicators } from "./components/TechnicalIndicators";
 import { AdvancedOrders } from "./components/AdvancedOrders";
+import { UserProfile } from "./components/UserProfile";
+import { Leaderboard } from "./components/Leaderboard";
+import { Notifications } from "./components/Notifications";
+import { PaperTrading } from "./components/PaperTrading";
+
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
@@ -458,6 +463,38 @@ const AppContent = () => {
   element={
     <ProtectedRoute>
       <AdvancedOrders />
+    </ProtectedRoute>
+  }
+/>
+<Route
+  path="/profile"
+  element={
+    <ProtectedRoute>
+      <UserProfile />
+    </ProtectedRoute>
+  }
+/>
+<Route
+  path="/leaderboard"
+  element={
+    <ProtectedRoute>
+      <Leaderboard />
+    </ProtectedRoute>
+  }
+/>
+<Route
+  path="/notifications"
+  element={
+    <ProtectedRoute>
+      <Notifications />
+    </ProtectedRoute>
+  }
+/>
+<Route
+  path="/paper-trading"
+  element={
+    <ProtectedRoute>
+      <PaperTrading />
     </ProtectedRoute>
   }
 />

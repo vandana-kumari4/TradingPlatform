@@ -6,11 +6,16 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const http = require("http");
 const socketIo = require("socket.io");
+const jwt = require("jsonwebtoken");
 
 const { HoldingsModel } = require("./model/HoldingsModel");
 const { PositionsModel } = require("./model/PositionsModel");
 const { OrdersModel } = require("./model/OrdersModel");
+const { UserModel } = require("./model/UserModel");
 const chatRouter = require("./routes/chat");
+const authRouter = require("./routes/auth");
+const notificationsRouter = require("./routes/notifications");
+const paperTradingRouter = require("./routes/paperTrading");
 
 const PORT = process.env.PORT || 4000;
 const uri = process.env.MONGO_URL;
@@ -51,7 +56,7 @@ io.on("connection", (socket) => {
       updatedPrices[stock] = Math.max(stockPrices[stock] + change, 100);
     });
     socket.emit("priceUpdate", updatedPrices);
-  }, 3000); // Update every 3 seconds
+  }, 3000);
 
   socket.on("disconnect", () => {
     console.log("User disconnected:", socket.id);
@@ -93,8 +98,11 @@ app.post("/newOrder", async (req, res) => {
   }
 });
 
-// Chat API Route
+// API Routes
+app.use("/api/auth", authRouter);
 app.use("/api/chat", chatRouter);
+app.use("/api/notifications", notificationsRouter);
+app.use("/api/paper-trading", paperTradingRouter);
 
 server.listen(PORT, () => {
   console.log(`App started on port ${PORT}!`);
