@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { useTheme } from "../context/ThemeContext";
 import { holdingsAPI, ordersAPI, positionsAPI } from "../services/api";
 import { TrendingUp, TrendingDown, Eye, EyeOff } from "lucide-react";

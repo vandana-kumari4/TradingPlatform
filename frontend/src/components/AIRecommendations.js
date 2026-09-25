@@ -9,7 +9,7 @@ import {
   CheckCircle,
   Loader,
 } from "lucide-react";
-import { Card, Select, Button, Badge, EmptyState } from "./UI";
+import { Select, Button, Badge, EmptyState } from "./UI";
 
 export const AIRecommendations = () => {
   const { isDark } = useTheme();
@@ -204,7 +204,6 @@ export const AIRecommendations = () => {
 
   const handleGetRecommendation = async () => {
     setLoading(true);
-    // Simulate API call
     setTimeout(() => {
       setRecommendation(getMockRecommendation(selectedStock));
       setLoading(false);
