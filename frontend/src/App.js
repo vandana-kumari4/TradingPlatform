@@ -18,7 +18,9 @@ import { UserProfile } from "./components/UserProfile";
 import { Leaderboard } from "./components/Leaderboard";
 import { Notifications } from "./components/Notifications";
 import { PaperTrading } from "./components/PaperTrading";
-
+import { AIRecommendations } from "./components/AIRecommendations";
+import { MultiAgentTrading } from "./components/MultiAgentTrading";
+import './styles/globals.css';
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
@@ -497,6 +499,23 @@ const AppContent = () => {
       <PaperTrading />
     </ProtectedRoute>
   }
+/>
+<Route
+  path="/ai-recommendations"
+  element={
+    <ProtectedRoute>
+      <AIRecommendations />
+    </ProtectedRoute>
+  }
+  />
+  <Route
+  path="/multi-agent-trading"
+  element={
+    <ProtectedRoute>
+      <MultiAgentTrading />
+    </ProtectedRoute>
+  }
+
 />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

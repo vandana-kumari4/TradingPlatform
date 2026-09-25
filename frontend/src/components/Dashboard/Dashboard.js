@@ -1,246 +1,453 @@
 import React, { useState, useEffect } from "react";
 import { useTheme } from "../../context/ThemeContext";
-import { hybridHoldingsAPI, hybridOrdersAPI, hybridPositionsAPI } from "../../services/hybridDataService";
-import { StockPrice } from "../StockPrice";
-import { StockChart } from "../StockChart";
+import designSystem from "../../styles/designSystem";
+import {
+  LineChart,
+  Line,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+import {
+  TrendingUp,
+  TrendingDown,
+  Wallet,
+  BarChart3,
+  PieChart,
+  ArrowUpRight,
+  ArrowDownLeft,
+  Clock,
+} from "lucide-react";
+import { Card, Badge, StatusBadge } from "../UI";
 
 export const Dashboard = () => {
-  const { colors } = useTheme();
-  const [holdings, setHoldings] = useState([]);
-  const [orders, setOrders] = useState([]);
-  const [positions, setPositions] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { isDark } = useTheme();
+  const { colors, spacing, typography, radius, shadow, transitions } = designSystem;
 
-  const portfolioData = {
-    totalValue: 450000,
-    dayChange: 2500,
-    dayChangePercent: 0.56,
-    cashAvailable: 50000,
-    investedValue: 400000,
-    returns: 12500,
-    returnsPercent: 3.22,
-  };
+  const portfolioData = [
+    { date: "Sep 15", value: 420000 },
+    { date: "Sep 16", value: 425000 },
+    { date: "Sep 17", value: 432000 },
+    { date: "Sep 18", value: 440000 },
+    { date: "Sep 19", value: 445000 },
+    { date: "Sep 20", value: 450000 },
+  ];
 
-  useEffect(() => {
-    loadDashboardData();
-  }, []);
+  const recentTrades = [
+    {
+      id: 1,
+      symbol: "INFY",
+      type: "BUY",
+      qty: 50,
+      price: 1550,
+      value: 77500,
+      time: "10:30 AM",
+      status: "completed",
+    },
+    {
+      id: 2,
+      symbol: "TCS",
+      type: "BUY",
+      qty: 30,
+      price: 3400,
+      value: 102000,
+      time: "02:15 PM",
+      status: "completed",
+    },
+    {
+      id: 3,
+      symbol: "RELIANCE",
+      type: "SELL",
+      qty: 20,
+      price: 2100,
+      value: 42000,
+      time: "03:45 PM",
+      status: "completed",
+    },
+  ];
 
-  const loadDashboardData = async () => {
-    try {
-      const [holdingsData, ordersData, positionsData] = await Promise.all([
-        hybridHoldingsAPI.getAll(),
-        hybridOrdersAPI.getAll(),
-        hybridPositionsAPI.getAll(),
-      ]);
+  const holdings = [
+    { symbol: "INFY", qty: 50, value: 77500, change: 2.5 },
+    { symbol: "TCS", qty: 30, value: 102000, change: -1.2 },
+    { symbol: "RELIANCE", qty: 20, value: 42000, change: 3.8 },
+  ];
 
-      if (holdingsData.success) setHoldings(holdingsData.data);
-      if (ordersData.success) setOrders(ordersData.data);
-      if (positionsData.success) setPositions(positionsData.data);
-    } catch (error) {
-      console.error("Error loading data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // STYLES
   const containerStyle = {
-    backgroundColor: colors.background,
+    backgroundColor: colors.bgSecondary,
     minHeight: "100vh",
-    padding: "2rem",
+    padding: `${spacing.xl} ${spacing.xl}`,
   };
 
-  const portfolioCardStyle = {
-    background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.primary}dd 100%)`,
-    color: "white",
-    borderRadius: "12px",
-    padding: "2rem",
-    marginBottom: "2rem",
+  const contentStyle = {
+    maxWidth: "1280px",
+    margin: "0 auto",
   };
 
-  const cardStyle = {
-    backgroundColor: colors.surface,
+  const headerStyle = {
+    marginBottom: spacing["3xl"],
+  };
+
+  const headerTitleStyle = {
+    ...typography.h1,
+    color: colors.textPrimary,
+    marginBottom: spacing.sm,
+  };
+
+  const headerSubtitleStyle = {
+    ...typography.bodyLarge,
+    color: colors.textSecondary,
+  };
+
+  const gridStyle = {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+    gap: spacing.lg,
+    marginBottom: spacing["2xl"],
+  };
+
+  const statCardStyle = {
+    backgroundColor: colors.bgPrimary,
     border: `1px solid ${colors.border}`,
-    borderRadius: "12px",
-    padding: "1.5rem",
-    marginBottom: "2rem",
+    borderRadius: radius.lg,
+    padding: spacing.xl,
+    boxShadow: shadow.xs,
+    transition: transitions.base,
+    cursor: "default",
+    ':hover': {
+      boxShadow: shadow.md,
+      borderColor: colors.primary,
+    },
   };
 
-  const tableStyle = {
-    width: "100%",
-    borderCollapse: "collapse",
+  const statIconStyle = {
+    width: "48px",
+    height: "48px",
+    borderRadius: radius.lg,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: spacing.md,
+    fontSize: "24px",
   };
 
-  const cellStyle = {
-    padding: "1rem",
-    textAlign: "left",
+  const statLabelStyle = {
+    ...typography.bodySmall,
+    color: colors.textSecondary,
+    marginBottom: spacing.sm,
+    fontWeight: 500,
+  };
+
+  const statValueStyle = {
+    ...typography.h2,
+    color: colors.textPrimary,
+    marginBottom: spacing.sm,
+  };
+
+  const statChangeStyle = {
+    display: "flex",
+    alignItems: "center",
+    gap: spacing.xs,
+    fontSize: "13px",
+    fontWeight: 600,
+  };
+
+  const chartContainerStyle = {
+    backgroundColor: colors.bgPrimary,
+    border: `1px solid ${colors.border}`,
+    borderRadius: radius.lg,
+    padding: spacing.xl,
+    marginBottom: spacing["2xl"],
+    boxShadow: shadow.xs,
+  };
+
+  const chartHeaderStyle = {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: spacing.xl,
+  };
+
+  const chartTitleStyle = {
+    ...typography.h3,
+    color: colors.textPrimary,
+  };
+
+  const chartTimestampStyle = {
+    ...typography.bodySmall,
+    color: colors.textSecondary,
+    display: "flex",
+    alignItems: "center",
+    gap: spacing.xs,
+  };
+
+  const sectionsGridStyle = {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+    gap: spacing.lg,
+  };
+
+  const sectionStyle = {
+    backgroundColor: colors.bgPrimary,
+    border: `1px solid ${colors.border}`,
+    borderRadius: radius.lg,
+    padding: spacing.xl,
+    boxShadow: shadow.xs,
+  };
+
+  const sectionTitleStyle = {
+    ...typography.h3,
+    color: colors.textPrimary,
+    marginBottom: spacing.lg,
+  };
+
+  const tradeRowStyle = {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: `${spacing.md} 0`,
     borderBottom: `1px solid ${colors.border}`,
+    ':last-child': {
+      borderBottom: 'none',
+    },
+  };
+
+  const tradeSymbolStyle = {
+    fontWeight: 600,
+    color: colors.textPrimary,
     fontSize: "14px",
   };
 
-  if (loading) {
-    return <div style={containerStyle}>Loading dashboard...</div>;
-  }
+  const tradeTimeStyle = {
+    fontSize: "12px",
+    color: colors.textSecondary,
+  };
 
+  const holdingRowStyle = {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: `${spacing.md} 0`,
+    borderBottom: `1px solid ${colors.border}`,
+    ':last-child': {
+      borderBottom: 'none',
+    },
+  };
+
+  const holdingValueStyle = {
+    fontWeight: 600,
+    color: colors.textPrimary,
+    textAlign: "right",
+  };
+
+  // COMPONENT
   return (
     <div style={containerStyle}>
-      <h1 style={{ color: colors.text, marginBottom: "2rem" }}>Portfolio</h1>
+      <div style={contentStyle}>
+        {/* HEADER */}
+        <div style={headerStyle}>
+          <h1 style={headerTitleStyle}>Welcome back, Vandana! 👋</h1>
+          <p style={headerSubtitleStyle}>Here's your portfolio overview</p>
+        </div>
 
-      <div style={portfolioCardStyle}>
-        <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <div>
-            <div style={{ fontSize: "12px", opacity: 0.9 }}>Total Portfolio Value</div>
-            <div style={{ fontSize: "32px", fontWeight: "bold", margin: "0.5rem 0" }}>
-              ₹{portfolioData.totalValue.toLocaleString()}
+        {/* STAT CARDS GRID */}
+        <div style={gridStyle}>
+          {/* Portfolio Value */}
+          <div style={statCardStyle}>
+            <div
+              style={{
+                ...statIconStyle,
+                backgroundColor: `${colors.primary}20`,
+              }}
+            >
+              <Wallet size={24} color={colors.primary} />
             </div>
-            <div style={{ fontSize: "14px" }}>
-              +₹{portfolioData.dayChange.toLocaleString()} ({portfolioData.dayChangePercent}%) Today
+            <div style={statLabelStyle}>Portfolio Value</div>
+            <div style={statValueStyle}>₹450,000</div>
+            <div style={statChangeStyle}>
+              <StatusBadge status="up" value="+₹30,000" size="sm" />
+              <span style={{ color: colors.success }}>+7.1%</span>
             </div>
           </div>
-          <div style={{ textAlign: "right" }}>
-            <div style={{ fontSize: "12px", opacity: 0.9 }}>Total Returns</div>
-            <div style={{ fontSize: "28px", fontWeight: "bold", margin: "0.5rem 0" }}>
-              ₹{portfolioData.returns.toLocaleString()}
+
+          {/* Today's Change */}
+          <div style={statCardStyle}>
+            <div
+              style={{
+                ...statIconStyle,
+                backgroundColor: `${colors.success}20`,
+              }}
+            >
+              <TrendingUp size={24} color={colors.success} />
             </div>
-            <div style={{ fontSize: "14px" }}>+{portfolioData.returnsPercent.toFixed(2)}%</div>
+            <div style={statLabelStyle}>Today's Change</div>
+            <div style={statValueStyle}>+₹2,345</div>
+            <div style={statChangeStyle}>
+              <ArrowUpRight size={14} color={colors.success} />
+              <span style={{ color: colors.success }}>+0.52%</span>
+            </div>
+          </div>
+
+          {/* Total Returns */}
+          <div style={statCardStyle}>
+            <div
+              style={{
+                ...statIconStyle,
+                backgroundColor: `${colors.info}20`,
+              }}
+            >
+              <BarChart3 size={24} color={colors.info} />
+            </div>
+            <div style={statLabelStyle}>Total Returns</div>
+            <div style={statValueStyle}>₹12,500</div>
+            <div style={statChangeStyle}>
+              <Badge variant="success" size="sm">
+                2.78% YTD
+              </Badge>
+            </div>
+          </div>
+
+          {/* Holdings Count */}
+          <div style={statCardStyle}>
+            <div
+              style={{
+                ...statIconStyle,
+                backgroundColor: `${colors.warning}20`,
+              }}
+            >
+              <PieChart size={24} color="#F59E0B" />
+            </div>
+            <div style={statLabelStyle}>Holdings</div>
+            <div style={statValueStyle}>5</div>
+            <div style={statChangeStyle}>
+              <span style={{ color: colors.textSecondary }}>Diversified portfolio</span>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Real Stock Prices */}
-      <div style={{ marginBottom: "2rem" }}>
-        <h2 style={{ color: colors.text, marginBottom: "1rem" }}>Stock Prices</h2>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1rem" }}>
-          <StockPrice symbol="INFY" />
-          <StockPrice symbol="TCS" />
-          <StockPrice symbol="HDFCBANK" />
-          <StockPrice symbol="WIPRO" />
+        {/* PORTFOLIO CHART */}
+        <div style={chartContainerStyle}>
+          <div style={chartHeaderStyle}>
+            <h2 style={chartTitleStyle}>Portfolio Growth</h2>
+            <div style={chartTimestampStyle}>
+              <Clock size={14} />
+              Last updated: 5 mins ago
+            </div>
+          </div>
+          <ResponsiveContainer width="100%" height={300}>
+            <AreaChart data={portfolioData}>
+              <defs>
+                <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor={colors.primary} stopOpacity={0.3} />
+                  <stop offset="95%" stopColor={colors.primary} stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke={colors.border}
+                vertical={false}
+              />
+              <XAxis dataKey="date" stroke={colors.textTertiary} />
+              <YAxis stroke={colors.textTertiary} />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: colors.bgPrimary,
+                  border: `1px solid ${colors.border}`,
+                  borderRadius: radius.md,
+                  boxShadow: shadow.md,
+                }}
+                formatter={(value) => `₹${value.toLocaleString()}`}
+              />
+              <Area
+                type="monotone"
+                dataKey="value"
+                stroke={colors.primary}
+                strokeWidth={2}
+                fillOpacity={1}
+                fill="url(#colorValue)"
+              />
+            </AreaChart>
+          </ResponsiveContainer>
         </div>
-      </div>
 
-      {/* Stock Charts */}
-      <StockChart symbol="INFY" height={350} />
-      <StockChart symbol="TCS" height={350} />
-      <StockChart symbol="HDFCBANK" height={350} />
-
-      <div style={cardStyle}>
-        <h2 style={{ color: colors.text, marginBottom: "1rem" }}>Your Holdings</h2>
-        {holdings.length > 0 ? (
-          <div style={{ overflowX: "auto" }}>
-            <table style={tableStyle}>
-              <thead style={{ backgroundColor: colors.surfaceLight }}>
-                <tr>
-                  <th style={cellStyle}>Stock</th>
-                  <th style={cellStyle}>Qty</th>
-                  <th style={cellStyle}>Avg</th>
-                  <th style={cellStyle}>Price</th>
-                  <th style={cellStyle}>Gain/Loss</th>
-                </tr>
-              </thead>
-              <tbody>
-                {holdings.map((h) => (
-                  <tr key={h._id}>
-                    <td style={cellStyle}><strong>{h.name}</strong></td>
-                    <td style={cellStyle}>{h.qty}</td>
-                    <td style={cellStyle}>₹{h.avg}</td>
-                    <td style={cellStyle}>₹{h.price}</td>
-                    <td style={{
-                      ...cellStyle,
-                      color: (h.price - h.avg) >= 0 ? colors.success : colors.danger,
-                      fontWeight: "600",
-                    }}>
-                      {(h.price - h.avg) >= 0 ? "+" : ""}₹{(h.price - h.avg).toFixed(2)} ({h.net})
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        {/* BOTTOM SECTIONS */}
+        <div style={sectionsGridStyle}>
+          {/* RECENT TRADES */}
+          <div style={sectionStyle}>
+            <h3 style={sectionTitleStyle}>Recent Trades</h3>
+            {recentTrades.map((trade) => (
+              <div key={trade.id} style={tradeRowStyle}>
+                <div>
+                  <div style={tradeSymbolStyle}>
+                    {trade.type === "BUY" ? (
+                      <ArrowDownLeft
+                        size={14}
+                        color={colors.success}
+                        style={{ marginRight: spacing.xs }}
+                      />
+                    ) : (
+                      <ArrowUpRight
+                        size={14}
+                        color={colors.error}
+                        style={{ marginRight: spacing.xs }}
+                      />
+                    )}
+                    {trade.symbol}
+                  </div>
+                  <div style={tradeTimeStyle}>{trade.time}</div>
+                </div>
+                <div
+                  style={{
+                    textAlign: "right",
+                  }}
+                >
+                  <Badge
+                    variant={trade.type === "BUY" ? "success" : "error"}
+                    size="sm"
+                  >
+                    {trade.type === "BUY" ? "Buy" : "Sell"} {trade.qty}
+                  </Badge>
+                  <div
+                    style={{
+                      fontSize: "13px",
+                      fontWeight: 600,
+                      color: colors.textPrimary,
+                      marginTop: spacing.xs,
+                    }}
+                  >
+                    ₹{trade.value.toLocaleString()}
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
-        ) : (
-          <div style={{ color: colors.textSecondary }}>No holdings yet</div>
-        )}
-      </div>
 
-      <div style={cardStyle}>
-        <h2 style={{ color: colors.text, marginBottom: "1rem" }}>Recent Orders</h2>
-        {orders.length > 0 ? (
-          <div style={{ overflowX: "auto" }}>
-            <table style={tableStyle}>
-              <thead style={{ backgroundColor: colors.surfaceLight }}>
-                <tr>
-                  <th style={cellStyle}>Stock</th>
-                  <th style={cellStyle}>Type</th>
-                  <th style={cellStyle}>Qty</th>
-                  <th style={cellStyle}>Price</th>
-                  <th style={cellStyle}>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {orders.map((o) => (
-                  <tr key={o._id}>
-                    <td style={cellStyle}><strong>{o.name}</strong></td>
-                    <td style={{
-                      ...cellStyle,
-                      color: o.type === "BUY" ? colors.success : colors.danger,
-                      fontWeight: "600",
-                    }}>
-                      {o.type}
-                    </td>
-                    <td style={cellStyle}>{o.qty}</td>
-                    <td style={cellStyle}>₹{o.price}</td>
-                    <td style={{
-                      ...cellStyle,
-                      backgroundColor: o.status === "COMPLETED" ? colors.successLight : colors.warningLight,
-                      color: o.status === "COMPLETED" ? colors.success : colors.warning,
-                      fontWeight: "600",
-                    }}>
-                      {o.status}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          {/* TOP HOLDINGS */}
+          <div style={sectionStyle}>
+            <h3 style={sectionTitleStyle}>Top Holdings</h3>
+            {holdings.map((holding) => (
+              <div key={holding.symbol} style={holdingRowStyle}>
+                <div>
+                  <div style={tradeSymbolStyle}>{holding.symbol}</div>
+                  <div style={tradeTimeStyle}>{holding.qty} shares</div>
+                </div>
+                <div style={holdingValueStyle}>
+                  <div>₹{holding.value.toLocaleString()}</div>
+                  <StatusBadge
+                    status={holding.change > 0 ? "up" : "down"}
+                    value={`${holding.change > 0 ? "+" : ""}${holding.change}%`}
+                    size="sm"
+                    showArrow={false}
+                  />
+                </div>
+              </div>
+            ))}
           </div>
-        ) : (
-          <div style={{ color: colors.textSecondary }}>No orders yet</div>
-        )}
-      </div>
-
-      <div style={cardStyle}>
-        <h2 style={{ color: colors.text, marginBottom: "1rem" }}>Positions</h2>
-        {positions.length > 0 ? (
-          <div style={{ overflowX: "auto" }}>
-            <table style={tableStyle}>
-              <thead style={{ backgroundColor: colors.surfaceLight }}>
-                <tr>
-                  <th style={cellStyle}>Stock</th>
-                  <th style={cellStyle}>Qty</th>
-                  <th style={cellStyle}>Avg Price</th>
-                  <th style={cellStyle}>Mark Price</th>
-                  <th style={cellStyle}>P&L</th>
-                </tr>
-              </thead>
-              <tbody>
-                {positions.map((p) => (
-                  <tr key={p._id}>
-                    <td style={cellStyle}><strong>{p.name}</strong></td>
-                    <td style={cellStyle}>{p.qty}</td>
-                    <td style={cellStyle}>₹{p.avgPrice}</td>
-                    <td style={cellStyle}>₹{p.markPrice}</td>
-                    <td style={{
-                      ...cellStyle,
-                      color: p.pnl >= 0 ? colors.success : colors.danger,
-                      fontWeight: "600",
-                    }}>
-                      {p.pnl >= 0 ? "+" : ""}{p.pnl}%
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <div style={{ color: colors.textSecondary }}>No positions yet</div>
-        )}
+        </div>
       </div>
     </div>
   );

@@ -16,7 +16,8 @@ const chatRouter = require("./routes/chat");
 const authRouter = require("./routes/auth");
 const notificationsRouter = require("./routes/notifications");
 const paperTradingRouter = require("./routes/paperTrading");
-
+const aiRecommendationsRouter = require("./routes/aiRecommendations");
+const multiAgentTradingRouter = require("./routes/multiAgentTrading");
 const PORT = process.env.PORT || 4000;
 const uri = process.env.MONGO_URL;
 
@@ -99,10 +100,15 @@ app.post("/newOrder", async (req, res) => {
 });
 
 // API Routes
+const multiAgentTradingRouter = require("./routes/multiAgentTrading");
+
+// API Routes
 app.use("/api/auth", authRouter);
 app.use("/api/chat", chatRouter);
 app.use("/api/notifications", notificationsRouter);
 app.use("/api/paper-trading", paperTradingRouter);
+app.use("/api/ai-recommendations", aiRecommendationsRouter);
+app.use("/api/multi-agent-trading", multiAgentTradingRouter);
 
 server.listen(PORT, () => {
   console.log(`App started on port ${PORT}!`);
