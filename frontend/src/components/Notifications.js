@@ -1,338 +1,375 @@
 import React, { useState } from "react";
 import { useTheme } from "../context/ThemeContext";
+import designSystem from "../styles/designSystem";
+import { Bell, Settings, Trash2, Check } from "lucide-react";
+import { Button, Badge } from "./UI";
 
 export const Notifications = () => {
-  const { colors } = useTheme();
-  const [alerts, setAlerts] = useState([
-    { id: 1, symbol: "INFY", targetPrice: 1600, condition: "above", createdAt: "2 days ago", status: "Active" },
-    { id: 2, symbol: "TCS", targetPrice: 3200, condition: "below", createdAt: "5 days ago", status: "Active" },
-    { id: 3, symbol: "HDFCBANK", targetPrice: 1700, condition: "above", createdAt: "1 week ago", status: "Triggered" },
+  const { isDark } = useTheme();
+  const { colors, spacing, typography, radius, shadow, transitions } = designSystem;
+
+  const [notifications, setNotifications] = useState([
+    {
+      id: 1,
+      type: "trade",
+      title: "Trade Executed",
+      message: "Your buy order for INFY 50 shares @ ₹1450 has been executed",
+      timestamp: "2 minutes ago",
+      read: false,
+    },
+    {
+      id: 2,
+      type: "alert",
+      title: "Price Alert",
+      message: "TCS has reached your target price of ₹3400",
+      timestamp: "15 minutes ago",
+      read: false,
+    },
+    {
+      id: 3,
+      type: "news",
+      title: "Market News",
+      message: "Indian markets close at 6-month high. Sensex gains 500 points",
+      timestamp: "1 hour ago",
+      read: true,
+    },
+    {
+      id: 4,
+      type: "recommendation",
+      title: "AI Recommendation",
+      message: "WIPRO shows strong buy signals. Consider accumulating on dips",
+      timestamp: "3 hours ago",
+      read: true,
+    },
+    {
+      id: 5,
+      type: "system",
+      title: "System Update",
+      message: "Platform maintenance completed successfully",
+      timestamp: "5 hours ago",
+      read: true,
+    },
   ]);
 
-  const [newAlert, setNewAlert] = useState({
-    symbol: "INFY",
-    targetPrice: 1600,
-    condition: "above",
+  const [settings, setSettings] = useState({
+    tradeAlerts: true,
+    priceAlerts: true,
+    newsUpdates: true,
+    aiRecommendations: true,
   });
 
-  const [notificationSettings, setNotificationSettings] = useState({
-    orderFilled: true,
-    priceAlert: true,
-    dailySummary: true,
-    newsUpdate: false,
-  });
+  const handleMarkAsRead = (id) => {
+    setNotifications(
+      notifications.map((notif) =>
+        notif.id === id ? { ...notif, read: true } : notif
+      )
+    );
+  };
 
-  const [showAddAlert, setShowAddAlert] = useState(false);
+  const handleDelete = (id) => {
+    setNotifications(notifications.filter((notif) => notif.id !== id));
+  };
 
-  const handleAddAlert = () => {
-    if (newAlert.targetPrice > 0) {
-      const alert = {
-        id: Math.random(),
-        ...newAlert,
-        createdAt: "just now",
-        status: "Active",
-      };
-      setAlerts([alert, ...alerts]);
-      setNewAlert({ symbol: "INFY", targetPrice: 1600, condition: "above" });
-      setShowAddAlert(false);
+  const handleSettingChange = (key) => {
+    setSettings((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
+  };
+
+  const getTypeColor = (type) => {
+    switch (type) {
+      case "trade":
+        return colors.success;
+      case "alert":
+        return colors.warning;
+      case "news":
+        return colors.primary;
+      case "recommendation":
+        return colors.info || colors.primary;
+      case "system":
+        return colors.textSecondary;
+      default:
+        return colors.primary;
     }
   };
 
-  const handleDeleteAlert = (id) => {
-    setAlerts(alerts.filter(alert => alert.id !== id));
+  const getTypeBadgeVariant = (type) => {
+    switch (type) {
+      case "trade":
+        return "success";
+      case "alert":
+        return "warning";
+      case "news":
+        return "info";
+      case "recommendation":
+        return "info";
+      default:
+        return "default";
+    }
   };
 
+  // STYLES
   const containerStyle = {
-    backgroundColor: colors.background,
+    backgroundColor: colors.bgSecondary,
     minHeight: "100vh",
-    padding: "2rem",
+    padding: `${spacing.xl} ${spacing.xl}`,
   };
 
-  const cardStyle = {
-    backgroundColor: colors.surface,
-    border: `1px solid ${colors.border}`,
-    borderRadius: "12px",
-    padding: "1.5rem",
-    marginBottom: "2rem",
+  const contentStyle = {
+    maxWidth: "900px",
+    margin: "0 auto",
   };
 
-  const inputStyle = {
-    width: "100%",
-    padding: "0.75rem",
-    borderRadius: "6px",
-    border: `1px solid ${colors.border}`,
-    backgroundColor: colors.background,
-    color: colors.text,
-    boxSizing: "border-box",
-    marginBottom: "1rem",
+  const headerStyle = {
+    marginBottom: spacing["2xl"],
   };
 
-  const selectStyle = {
-    ...inputStyle,
+  const headerTitleStyle = {
+    ...typography.h1,
+    color: colors.textPrimary,
+    marginBottom: spacing.sm,
+  };
+
+  const headerSubtitleStyle = {
+    ...typography.bodyLarge,
+    color: colors.textSecondary,
+  };
+
+  const tabsStyle = {
+    display: "flex",
+    gap: spacing.md,
+    marginBottom: spacing.xl,
+    borderBottom: `2px solid ${colors.border}`,
+  };
+
+  const tabStyle = (isActive = false) => ({
+    padding: `${spacing.md} ${spacing.lg}`,
+    borderBottom: isActive ? `3px solid ${colors.primary}` : "none",
+    color: isActive ? colors.primary : colors.textSecondary,
     cursor: "pointer",
+    transition: transitions.base,
+    fontWeight: isActive ? 600 : 400,
+  });
+
+  const notificationCardStyle = (isRead = false) => ({
+    backgroundColor: isRead ? colors.bgPrimary : `${colors.primary}08`,
+    border: `1px solid ${isRead ? colors.border : colors.primary}20`,
+    borderRadius: radius.lg,
+    padding: spacing.lg,
+    marginBottom: spacing.lg,
+    display: "flex",
+    gap: spacing.lg,
+    transition: transitions.base,
+  });
+
+  const notificationDotStyle = (type) => ({
+    width: "12px",
+    height: "12px",
+    borderRadius: "50%",
+    backgroundColor: getTypeColor(type),
+    marginTop: "4px",
+    flexShrink: 0,
+  });
+
+  const notificationContentStyle = {
+    flex: 1,
   };
 
-  const buttonStyle = {
-    padding: "0.75rem 1.5rem",
-    borderRadius: "6px",
-    border: "none",
-    backgroundColor: colors.primary,
-    color: "white",
-    cursor: "pointer",
-    fontWeight: "600",
-    width: "100%",
+  const notificationTitleStyle = {
+    ...typography.bodyLarge,
+    fontWeight: 600,
+    color: colors.textPrimary,
+    marginBottom: spacing.xs,
   };
 
-  const tableStyle = {
-    width: "100%",
-    borderCollapse: "collapse",
-    marginTop: "1rem",
+  const notificationMessageStyle = {
+    ...typography.bodySmall,
+    color: colors.textSecondary,
+    marginBottom: spacing.sm,
   };
 
-  const headerCellStyle = {
-    padding: "1rem",
-    textAlign: "left",
-    backgroundColor: colors.surfaceLight,
-    fontWeight: "600",
-    color: colors.text,
-    borderBottom: `1px solid ${colors.border}`,
+  const notificationTimeStyle = {
+    ...typography.bodySmall,
+    color: colors.textTertiary,
+    fontSize: "12px",
   };
 
-  const cellStyle = {
-    padding: "1rem",
-    textAlign: "left",
-    borderBottom: `1px solid ${colors.border}`,
-    color: colors.text,
+  const notificationActionsStyle = {
+    display: "flex",
+    gap: spacing.sm,
+    alignItems: "center",
   };
 
-  const toggleStyle = {
+  const settingsCardStyle = {
+    backgroundColor: colors.bgPrimary,
+    border: `1px solid ${colors.border}`,
+    borderRadius: radius.lg,
+    padding: spacing.xl,
+  };
+
+  const settingsHeaderStyle = {
+    ...typography.h3,
+    color: colors.textPrimary,
+    marginBottom: spacing.lg,
     display: "flex",
     alignItems: "center",
-    gap: "0.5rem",
+    gap: spacing.sm,
   };
 
-  const toggleSwitch = (checked) => (
-    <input
-      type="checkbox"
-      checked={checked}
-      onChange={(e) => {}}
-      style={{
-        width: "20px",
-        height: "20px",
-        cursor: "pointer",
-      }}
-    />
-  );
+  const settingItemStyle = {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: `${spacing.md} 0`,
+    borderBottom: `1px solid ${colors.border}`,
+  };
 
+  const settingLabelStyle = {
+    ...typography.bodyLarge,
+    color: colors.textPrimary,
+  };
+
+  const checkboxStyle = {
+    width: "20px",
+    height: "20px",
+    cursor: "pointer",
+    accentColor: colors.primary,
+  };
+
+  const emptyStateStyle = {
+    padding: `${spacing["3xl"]} ${spacing.xl}`,
+    textAlign: "center",
+    backgroundColor: colors.bgPrimary,
+    borderRadius: radius.lg,
+    border: `1px solid ${colors.border}`,
+  };
+
+  const emptyIconStyle = {
+    fontSize: "48px",
+    marginBottom: spacing.lg,
+    opacity: 0.5,
+  };
+
+  // COMPONENT
   return (
     <div style={containerStyle}>
-      <h1 style={{ color: colors.text, marginBottom: "2rem" }}>🔔 Notifications & Alerts</h1>
-
-      {/* Notification Settings */}
-      <div style={cardStyle}>
-        <h2 style={{ color: colors.text, marginBottom: "1.5rem" }}>📧 Email Preferences</h2>
-        
-        <div style={{ display: "grid", gap: "1rem" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "1rem", backgroundColor: colors.surfaceLight, borderRadius: "8px" }}>
-            <div>
-              <h3 style={{ color: colors.text, margin: 0 }}>Order Filled Alerts</h3>
-              <p style={{ color: colors.textSecondary, margin: "0.5rem 0 0 0", fontSize: "12px" }}>Get notified when your orders are executed</p>
-            </div>
-            <input
-              type="checkbox"
-              checked={notificationSettings.orderFilled}
-              onChange={(e) => setNotificationSettings({ ...notificationSettings, orderFilled: e.target.checked })}
-              style={{ width: "24px", height: "24px", cursor: "pointer" }}
-            />
-          </div>
-
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "1rem", backgroundColor: colors.surfaceLight, borderRadius: "8px" }}>
-            <div>
-              <h3 style={{ color: colors.text, margin: 0 }}>Price Alerts</h3>
-              <p style={{ color: colors.textSecondary, margin: "0.5rem 0 0 0", fontSize: "12px" }}>Notifications when stocks hit your target prices</p>
-            </div>
-            <input
-              type="checkbox"
-              checked={notificationSettings.priceAlert}
-              onChange={(e) => setNotificationSettings({ ...notificationSettings, priceAlert: e.target.checked })}
-              style={{ width: "24px", height: "24px", cursor: "pointer" }}
-            />
-          </div>
-
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "1rem", backgroundColor: colors.surfaceLight, borderRadius: "8px" }}>
-            <div>
-              <h3 style={{ color: colors.text, margin: 0 }}>Daily Market Summary</h3>
-              <p style={{ color: colors.textSecondary, margin: "0.5rem 0 0 0", fontSize: "12px" }}>Daily recap of market performance and your portfolio</p>
-            </div>
-            <input
-              type="checkbox"
-              checked={notificationSettings.dailySummary}
-              onChange={(e) => setNotificationSettings({ ...notificationSettings, dailySummary: e.target.checked })}
-              style={{ width: "24px", height: "24px", cursor: "pointer" }}
-            />
-          </div>
-
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "1rem", backgroundColor: colors.surfaceLight, borderRadius: "8px" }}>
-            <div>
-              <h3 style={{ color: colors.text, margin: 0 }}>News Updates</h3>
-              <p style={{ color: colors.textSecondary, margin: "0.5rem 0 0 0", fontSize: "12px" }}>Important market news and company announcements</p>
-            </div>
-            <input
-              type="checkbox"
-              checked={notificationSettings.newsUpdate}
-              onChange={(e) => setNotificationSettings({ ...notificationSettings, newsUpdate: e.target.checked })}
-              style={{ width: "24px", height: "24px", cursor: "pointer" }}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Price Alerts */}
-      <div style={cardStyle}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
-          <h2 style={{ color: colors.text, margin: 0 }}>📊 Price Alerts</h2>
-          <button
-            onClick={() => setShowAddAlert(!showAddAlert)}
-            style={{ ...buttonStyle, width: "auto", padding: "0.5rem 1rem" }}
-          >
-            {showAddAlert ? "Cancel" : "+ Add Alert"}
-          </button>
+      <div style={contentStyle}>
+        {/* HEADER */}
+        <div style={headerStyle}>
+          <h1 style={headerTitleStyle}>Notifications</h1>
+          <p style={headerSubtitleStyle}>
+            Stay updated with market alerts and trading updates
+          </p>
         </div>
 
-        {showAddAlert && (
-          <div style={{ backgroundColor: colors.surfaceLight, padding: "1.5rem", borderRadius: "8px", marginBottom: "1.5rem" }}>
-            <label style={{ color: colors.textSecondary, fontSize: "12px", fontWeight: "600" }}>Stock</label>
-            <select
-              value={newAlert.symbol}
-              onChange={(e) => setNewAlert({ ...newAlert, symbol: e.target.value })}
-              style={selectStyle}
-            >
-              <option>INFY</option>
-              <option>TCS</option>
-              <option>HDFCBANK</option>
-              <option>WIPRO</option>
-              <option>RELIANCE</option>
-            </select>
-
-            <label style={{ color: colors.textSecondary, fontSize: "12px", fontWeight: "600" }}>Target Price (₹)</label>
-            <input
-              type="number"
-              value={newAlert.targetPrice}
-              onChange={(e) => setNewAlert({ ...newAlert, targetPrice: parseFloat(e.target.value) })}
-              style={inputStyle}
-            />
-
-            <label style={{ color: colors.textSecondary, fontSize: "12px", fontWeight: "600" }}>Condition</label>
-            <select
-              value={newAlert.condition}
-              onChange={(e) => setNewAlert({ ...newAlert, condition: e.target.value })}
-              style={selectStyle}
-            >
-              <option value="above">Above</option>
-              <option value="below">Below</option>
-            </select>
-
-            <button onClick={handleAddAlert} style={buttonStyle}>
-              Create Alert
-            </button>
+        {/* TABS */}
+        <div style={tabsStyle}>
+          <div style={tabStyle(true)}>
+            <Bell size={16} style={{ marginRight: spacing.xs, display: "inline" }} />
+            All Notifications
           </div>
-        )}
+          <div style={tabStyle()}>Unread</div>
+          <div style={tabStyle()}>Settings</div>
+        </div>
 
-        {alerts.length > 0 ? (
-          <div style={{ overflowX: "auto" }}>
-            <table style={tableStyle}>
-              <thead>
-                <tr>
-                  <th style={headerCellStyle}>Stock</th>
-                  <th style={headerCellStyle}>Condition</th>
-                  <th style={headerCellStyle}>Target Price</th>
-                  <th style={headerCellStyle}>Status</th>
-                  <th style={headerCellStyle}>Created</th>
-                  <th style={headerCellStyle}>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {alerts.map((alert) => (
-                  <tr key={alert.id}>
-                    <td style={cellStyle}><strong>{alert.symbol}</strong></td>
-                    <td style={cellStyle}>
-                      {alert.condition === "above" ? "📈 Above" : "📉 Below"}
-                    </td>
-                    <td style={cellStyle}>₹{alert.targetPrice}</td>
-                    <td style={cellStyle}>
-                      <span style={{
-                        backgroundColor: alert.status === "Active" ? colors.success : colors.warning,
-                        color: "white",
-                        padding: "0.25rem 0.75rem",
-                        borderRadius: "4px",
-                        fontSize: "12px",
-                        fontWeight: "600",
-                      }}>
-                        {alert.status}
-                      </span>
-                    </td>
-                    <td style={cellStyle}>{alert.createdAt}</td>
-                    <td style={cellStyle}>
-                      <button
-                        onClick={() => handleDeleteAlert(alert.id)}
-                        style={{
-                          padding: "0.5rem 1rem",
-                          borderRadius: "4px",
-                          border: "none",
-                          backgroundColor: colors.danger,
-                          color: "white",
-                          cursor: "pointer",
-                          fontSize: "12px",
-                          fontWeight: "600",
-                        }}
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+        {/* NOTIFICATIONS LIST */}
+        {notifications.length > 0 ? (
+          <>
+            {notifications.map((notification) => (
+              <div
+                key={notification.id}
+                style={notificationCardStyle(notification.read)}
+              >
+                <div style={notificationDotStyle(notification.type)} />
+
+                <div style={notificationContentStyle}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: spacing.sm,
+                      marginBottom: spacing.xs,
+                    }}
+                  >
+                    <h3 style={notificationTitleStyle}>{notification.title}</h3>
+                    <Badge variant={getTypeBadgeVariant(notification.type)} size="sm">
+                      {notification.type}
+                    </Badge>
+                  </div>
+                  <p style={notificationMessageStyle}>{notification.message}</p>
+                  <p style={notificationTimeStyle}>{notification.timestamp}</p>
+                </div>
+
+                <div style={notificationActionsStyle}>
+                  {!notification.read && (
+                    <button
+                      onClick={() => handleMarkAsRead(notification.id)}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        color: colors.success,
+                        padding: spacing.sm,
+                      }}
+                      title="Mark as read"
+                    >
+                      <Check size={16} />
+                    </button>
+                  )}
+                  <button
+                    onClick={() => handleDelete(notification.id)}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      color: colors.error,
+                      padding: spacing.sm,
+                    }}
+                    title="Delete notification"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </>
         ) : (
-          <div style={{ textAlign: "center", padding: "2rem", color: colors.textSecondary }}>
-            No alerts created yet. Create one to get started!
+          <div style={emptyStateStyle}>
+            <div style={emptyIconStyle}>📭</div>
+            <p style={{ ...typography.bodyLarge, color: colors.textSecondary }}>
+              No notifications
+            </p>
           </div>
         )}
-      </div>
 
-      {/* Recent Notifications */}
-      <div style={cardStyle}>
-        <h2 style={{ color: colors.text, marginBottom: "1.5rem" }}>📬 Recent Notifications</h2>
-        <div style={{ display: "grid", gap: "1rem" }}>
-          <div style={{ backgroundColor: colors.surfaceLight, padding: "1rem", borderRadius: "8px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
-              <strong style={{ color: colors.text }}>INFY Price Alert Triggered</strong>
-              <span style={{ color: colors.textSecondary, fontSize: "12px" }}>2 hours ago</span>
-            </div>
-            <p style={{ color: colors.textSecondary, margin: "0.5rem 0", fontSize: "14px" }}>
-              ✅ INFY reached ₹1700, above your target of ₹1600
-            </p>
-          </div>
+        {/* SETTINGS */}
+        <div style={{ marginTop: spacing["3xl"] }}>
+          <div style={settingsCardStyle}>
+            <h3 style={settingsHeaderStyle}>
+              <Settings size={20} />
+              Notification Settings
+            </h3>
 
-          <div style={{ backgroundColor: colors.surfaceLight, padding: "1rem", borderRadius: "8px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
-              <strong style={{ color: colors.text }}>Order Executed</strong>
-              <span style={{ color: colors.textSecondary, fontSize: "12px" }}>Yesterday</span>
-            </div>
-            <p style={{ color: colors.textSecondary, margin: "0.5rem 0", fontSize: "14px" }}>
-              ✅ Buy order for 10 TCS shares @ ₹3400 executed
-            </p>
-          </div>
-
-          <div style={{ backgroundColor: colors.surfaceLight, padding: "1rem", borderRadius: "8px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
-              <strong style={{ color: colors.text }}>Daily Market Summary</strong>
-              <span style={{ color: colors.textSecondary, fontSize: "12px" }}>2 days ago</span>
-            </div>
-            <p style={{ color: colors.textSecondary, margin: "0.5rem 0", fontSize: "14px" }}>
-              📊 Your portfolio is up +2.27% today. Market performing well.
-            </p>
+            {Object.entries(settings).map(([key, value]) => (
+              <div key={key} style={settingItemStyle}>
+                <label style={settingLabelStyle}>
+                  {key === "tradeAlerts"
+                    ? "Trade Execution Alerts"
+                    : key === "priceAlerts"
+                    ? "Price Alerts"
+                    : key === "newsUpdates"
+                    ? "Market News Updates"
+                    : "AI Recommendations"}
+                </label>
+                <input
+                  type="checkbox"
+                  checked={value}
+                  onChange={() => handleSettingChange(key)}
+                  style={checkboxStyle}
+                />
+              </div>
+            ))}
           </div>
         </div>
       </div>
