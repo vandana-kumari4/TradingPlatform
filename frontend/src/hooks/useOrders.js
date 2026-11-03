@@ -16,7 +16,7 @@ export const useOrders = () => {
     try {
       console.log("Fetching orders...");
       
-      const response = await fetch("http://localhost:4000/allOrders", {
+      const response = await fetch((process.env.react_app_api_url || "http://localhost:4000") + "/allOrders", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -53,7 +53,7 @@ export const useOrders = () => {
 
   const createOrder = async (orderData) => {
     try {
-      const response = await fetch("http://localhost:4000/newOrder", {
+      const response = await fetch((process.env.react_app_api_url || "http://localhost:4000") + "/newOrder", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

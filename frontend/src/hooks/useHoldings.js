@@ -16,7 +16,7 @@ export const useHoldings = () => {
     try {
       console.log("Fetching holdings...");
       
-      const response = await fetch("http://localhost:4000/allHoldings", {
+      const response = await fetch((process.env.react_app_api_url || "http://localhost:4000") + "/allHoldings", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

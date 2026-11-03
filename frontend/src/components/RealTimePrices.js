@@ -8,7 +8,7 @@ export const RealTimePrices = () => {
   const [connected, setConnected] = useState(false);
 
   useEffect(() => {
-    const socket = io("http://localhost:4000");
+    const socket = io((process.env.react_app_api_url || "http://localhost:4000") + "");
 
     socket.on("connect", () => {
       console.log("Connected to WebSocket");

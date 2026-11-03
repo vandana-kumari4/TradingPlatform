@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://localhost:4000/api";
+const API_BASE_URL = (process.env.react_app_api_url || "http://localhost:4000") + "/api";
 
 // Auth APIs
 export const authAPI = {
@@ -35,7 +35,7 @@ export const authAPI = {
 // Holdings APIs
 export const holdingsAPI = {
   getAll: async (token) => {
-    const response = await fetch("http://localhost:4000/allHoldings", {
+    const response = await fetch((process.env.react_app_api_url || "http://localhost:4000") + "/allHoldings", {
       method: "GET",
       headers: { 
         "Content-Type": "application/json",
@@ -49,7 +49,7 @@ export const holdingsAPI = {
 // Orders APIs
 export const ordersAPI = {
   getAll: async (token) => {
-    const response = await fetch("http://localhost:4000/allOrders", {
+    const response = await fetch((process.env.react_app_api_url || "http://localhost:4000") + "/allOrders", {
       method: "GET",
       headers: { 
         "Content-Type": "application/json",
@@ -60,7 +60,7 @@ export const ordersAPI = {
   },
 
   create: async (orderData, token) => {
-    const response = await fetch("http://localhost:4000/newOrder", {
+    const response = await fetch((process.env.react_app_api_url || "http://localhost:4000") + "/newOrder", {
       method: "POST",
       headers: { 
         "Content-Type": "application/json",
@@ -75,7 +75,7 @@ export const ordersAPI = {
 // Positions APIs
 export const positionsAPI = {
   getAll: async (token) => {
-    const response = await fetch("http://localhost:4000/allPositions", {
+    const response = await fetch((process.env.react_app_api_url || "http://localhost:4000") + "/allPositions", {
       method: "GET",
       headers: { 
         "Content-Type": "application/json",
