@@ -15,7 +15,7 @@ export const usePositions = () => {
 
     try {
       const token = localStorage.getItem("authToken");
-      const response = await fetch((process.env.react_app_api_url || "http://localhost:4000") + "/allPositions", {
+      const response = await fetch((process.env.REACT_APP_API_URL || "http://localhost:4000") + "/allPositions", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

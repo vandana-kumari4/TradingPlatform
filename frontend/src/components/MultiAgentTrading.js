@@ -48,7 +48,7 @@ export const MultiAgentTrading = () => {
   const handleAnalyze = async () => {
     setLoading(true);
     try {
-      const response = await fetch((process.env.react_app_api_url || "http://localhost:4000") + "/api/multi-agent-trading/analyze", {
+      const response = await fetch((process.env.REACT_APP_API_URL || "http://localhost:4000") + "/api/multi-agent-trading/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

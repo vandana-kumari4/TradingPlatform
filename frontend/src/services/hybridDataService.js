@@ -1,5 +1,5 @@
 // Hybrid Data Service - Use mock data when backend is not available
-const API_BASE_URL = (process.env.react_app_api_url || "http://localhost:4000") + "/api";
+const API_BASE_URL = (process.env.REACT_APP_API_URL || "http://localhost:4000") + "/api";
 
 // Mock data
 const mockHoldings = [
