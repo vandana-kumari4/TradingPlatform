@@ -1,4 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+/* ============================================
+   GLOBAL STYLES - DESIGN SYSTEM V2
+   ============================================ */
 
 * {
   margin: 0;
@@ -12,92 +14,358 @@ html {
 
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background-color: #F9FAFB;
-  color: #1F2937;
-  line-height: 1.5;
+  background-color: #F7F8FA;
+  color: #111827;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Typography */
+/* ============================================
+   TYPOGRAPHY
+   ============================================ */
+
+h1, h2, h3, h4, h5, h6 {
+  line-height: 1.2;
+  font-weight: 700;
+}
+
 h1 {
   font-size: 32px;
-  font-weight: 700;
-  line-height: 40px;
   letter-spacing: -0.5px;
 }
 
 h2 {
   font-size: 24px;
-  font-weight: 700;
-  line-height: 32px;
-  letter-spacing: -0.3px;
+  letter-spacing: -0.25px;
 }
 
 h3 {
-  font-size: 18px;
+  font-size: 20px;
+}
+
+h4 {
+  font-size: 16px;
   font-weight: 600;
-  line-height: 28px;
+}
+
+h5 {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+h6 {
+  font-size: 12px;
+  font-weight: 600;
 }
 
 p {
+  margin: 0;
+  color: #667085;
+}
+
+a {
+  color: #2563EB;
+  text-decoration: none;
+  transition: color 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+a:hover {
+  color: #1E40AF;
+}
+
+/* ============================================
+   FORMS
+   ============================================ */
+
+input,
+textarea,
+select {
+  font-family: inherit;
   font-size: 14px;
-  font-weight: 400;
-  line-height: 20px;
-  color: #6B7280;
+  color: #111827;
 }
 
-label {
-  font-size: 12px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: #6B7280;
+input::placeholder,
+textarea::placeholder {
+  color: #98A2B3;
 }
 
-/* Buttons */
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+}
+
+/* ============================================
+   BUTTONS
+   ============================================ */
+
 button {
-  font-family: 'Inter', sans-serif;
+  font-family: inherit;
   cursor: pointer;
-  border: none;
   transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 button:disabled {
-  opacity: 0.5;
   cursor: not-allowed;
+  opacity: 0.6;
 }
 
-/* Forms */
-input,
-select,
-textarea {
-  font-family: 'Inter', sans-serif;
-  font-size: 14px;
+/* ============================================
+   SCROLLBARS
+   ============================================ */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
 }
 
-input:focus,
-select:focus,
-textarea:focus {
-  outline: none;
+::-webkit-scrollbar-track {
+  background: #F7F8FA;
 }
 
-/* Utilities */
-.container {
+::-webkit-scrollbar-thumb {
+  background: #E4E7EC;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #D1D5DB;
+}
+
+/* Firefox Scrollbar */
+* {
+  scrollbar-color: #E4E7EC #F7F8FA;
+  scrollbar-width: thin;
+}
+
+/* Sidebar custom scrollbar */
+aside::-webkit-scrollbar {
+  width: 6px;
+}
+
+aside::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+aside::-webkit-scrollbar-thumb {
+  background: #E4E7EC;
+  border-radius: 3px;
+}
+
+aside::-webkit-scrollbar-thumb:hover {
+  background: #D1D5DB;
+}
+
+/* ============================================
+   TABLES
+   ============================================ */
+
+table {
   width: 100%;
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 0 16px;
+  border-collapse: collapse;
 }
 
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border-width: 0;
+th {
+  text-align: left;
+  font-weight: 600;
+  color: #667085;
+}
+
+td, th {
+  padding: 12px 16px;
+  border-bottom: 1px solid #E4E7EC;
+}
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* ============================================
+   NAVBAR RESPONSIVE
+   ============================================ */
+
+@media (max-width: 1023px) {
+  .navbar-menu-button {
+    display: block !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .navbar-menu-button {
+    display: none !important;
+  }
+}
+
+/* ============================================
+   SIDEBAR RESPONSIVE - DESKTOP
+   ============================================ */
+
+@media (min-width: 1024px) {
+  .sidebar-v2 {
+    display: block !important;
+    position: fixed !important;
+    left: 0 !important;
+    top: 64px !important;
+    width: 260px !important;
+    height: calc(100vh - 64px) !important;
+    z-index: 40 !important;
+    transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    overflow-y: auto;
+    border-right: 1px solid #E4E7EC;
+  }
+
+  .sidebar-close-btn {
+    display: none !important;
+  }
+}
+
+/* ============================================
+   SIDEBAR RESPONSIVE - MOBILE
+   ============================================ */
+
+@media (max-width: 1023px) {
+  .sidebar-v2 {
+    position: fixed;
+    top: 64px;
+    left: -260px;
+    width: 260px;
+    height: calc(100vh - 64px);
+    z-index: 50;
+    transition: left 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    overflow-y: auto;
+    border-right: 1px solid #E4E7EC;
+    background-color: #FFFFFF;
+  }
+
+  .sidebar-v2.sidebar-open {
+    left: 0;
+    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Overlay backdrop when sidebar is open */
+  .sidebar-v2.sidebar-open::after {
+    content: "";
+    position: fixed;
+    top: 64px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.3);
+    z-index: -1;
+  }
+
+  .sidebar-close-btn {
+    display: block !important;
+  }
+}
+/* ============================================
+   MAIN CONTENT AREA
+   ============================================ */
+
+main {
+  flex: 1;
+  width: 100%;
+  overflow-y: auto;
+  position: relative;
+  z-index: 1;
+  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  background-color: #F7F8FA;
+}
+
+/* Desktop: Sidebar is fixed, adjust main width */
+@media (min-width: 1024px) {
+  main {
+    width: calc(100% - 260px);
+    margin-left: 260px;
+  }
+}
+
+/* Mobile: Full width, sidebar is overlay */
+@media (max-width: 1023px) {
+  main {
+    width: 100%;
+    margin-left: 0;
+  }
+}
+
+
+/* Mobile: Full width */
+@media (max-width: 1023px) {
+  main {
+    margin-left: 0;
+    padding-left: 0;
+    width: 100%;
+  }
+}
+
+/* ============================================
+   NAV ITEMS
+   ============================================ */
+
+.nav-item-active {
+  background-color: #EFF6FF !important;
+  color: #2563EB !important;
+  border-left-color: #2563EB !important;
+}
+
+/* ============================================
+   RESPONSIVE TYPOGRAPHY
+   ============================================ */
+
+@media (max-width: 768px) {
+  h1 {
+    font-size: 24px;
+  }
+
+  h2 {
+    font-size: 20px;
+  }
+
+  h3 {
+    font-size: 16px;
+  }
+
+  body {
+    font-size: 14px;
+  }
+}
+
+/* ============================================
+   DARK MODE (Optional)
+   ============================================ */
+
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #0F1419;
+    color: #F3F4F6;
+  }
+
+  a {
+    color: #60A5FA;
+  }
+
+  a:hover {
+    color: #93C5FD;
+  }
+}
+
+/* ============================================
+   SMOOTH TRANSITIONS
+   ============================================ */
+
+.sidebar-v2,
+.sidebar-close-btn,
+main {
+  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
 }

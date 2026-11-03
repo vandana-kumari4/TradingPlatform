@@ -1,22 +1,25 @@
 import React, { useState } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
 import { ThemeProvider, useTheme } from "./context/ThemeContext";
 import { AuthProvider, useAuth } from "./context/AuthContext";
-import Navbar from "./components/Navbar";
-import Dashboard from "./components/Dashboard/Dashboard";
-import { hybridOrdersAPI, hybridHoldingsAPI, hybridPositionsAPI } from "./services/hybridDataService";
-import { PortfolioAnalytics } from "./components/PortfolioAnalytics";
-import { Watchlist } from "./components/WatchList";
+import NavbarV2 from "./components/NavbarV2";
+import SidebarV2 from "./components/SidebarV2";
+import DashboardV2Professional from "./components/Dashboard/DashboardV2Professional";
+import HoldingsV2 from "./components/HoldingsV2";
+import ScreenerV2 from "./components/ScreenerV2";
+import AnalyticsV2 from "./components/AnalyticsV2";
+import NotificationsV2 from "./components/NotificationsV2";
+import ProfileV2 from "./components/ProfileV2";
+import OrdersV2 from "./components/OrdersV2";
+import designSystemV2 from "./styles/designSystemV2";
+import WatchList from "./components/WatchList";
 import { StockSearch } from "./components/StockSearch";
-import { StockScreener } from "./components/StockScreener";
 import { BenchmarkComparison } from "./components/BenchmarkComparison";
 import { AITradingAssistant } from "./components/AITradingAssistant";
 import { RealTimePrices } from "./components/RealTimePrices";
 import { TechnicalIndicators } from "./components/TechnicalIndicators";
 import { AdvancedOrders } from "./components/AdvancedOrders";
-import { UserProfile } from "./components/UserProfile";
 import { Leaderboard } from "./components/Leaderboard";
-import { Notifications } from "./components/Notifications";
 import { PaperTrading } from "./components/PaperTrading";
 import { AIRecommendations } from "./components/AIRecommendations";
 import { MultiAgentTrading } from "./components/MultiAgentTrading";
@@ -30,20 +33,38 @@ const ProtectedRoute = ({ children }) => {
 };
 
 function Home() {
-  const { colors } = useTheme();
+  const { colors, spacing, typography } = designSystemV2;
   const navigate = useNavigate();
 
   return (
-    <div style={{ backgroundColor: colors.background, minHeight: "calc(100vh - 64px)" }}>
+    <div style={{
+      backgroundColor: colors.bg,
+      minHeight: "100vh",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: spacing.xl,
+      width: "100%",
+    }}>
       <div style={{
-        padding: "4rem 2rem",
         textAlign: "center",
-        background: `linear-gradient(135deg, ${colors.primary}20 0%, ${colors.primary}10 100%)`,
+        maxWidth: "600px",
+        width: "100%",
       }}>
-        <h1 style={{ fontSize: "48px", fontWeight: "bold", marginBottom: "1rem", color: colors.text }}>
-          💰 MarketMastery
+        <h1 style={{
+          ...typography.h1,
+          color: colors.textPrimary,
+          marginBottom: spacing.lg,
+          fontSize: "48px",
+        }}>
+          MarketMastery
         </h1>
-        <p style={{ fontSize: "18px", color: colors.textSecondary, marginBottom: "2rem" }}>
+        <p style={{
+          ...typography.bodyLarge,
+          color: colors.textSecondary,
+          marginBottom: spacing["2xl"],
+          fontSize: "18px",
+        }}>
           Professional stock trading platform
         </p>
         <button
@@ -51,12 +72,13 @@ function Home() {
           style={{
             backgroundColor: colors.primary,
             color: "white",
-            padding: "1rem 2rem",
+            padding: `${spacing.md} ${spacing.xl}`,
             border: "none",
             borderRadius: "8px",
-            fontSize: "16px",
-            fontWeight: "600",
+            ...typography.body,
+            fontWeight: 600,
             cursor: "pointer",
+            fontSize: "16px",
           }}
         >
           Get Started
@@ -67,18 +89,39 @@ function Home() {
 }
 
 function Login() {
-  const { colors } = useTheme();
+  const { colors, spacing, typography, radius } = designSystemV2;
   const navigate = useNavigate();
   const { setIsAuthenticated } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    if (email && password) {
-      localStorage.setItem("authToken", "token_" + Date.now());
-      setIsAuthenticated(true);
-      navigate("/dashboard");
+    setLoading(true);
+    setError("");
+
+    try {
+      const response = await fetch("http://localhost:4000/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        localStorage.setItem("authToken", data.token);
+        setIsAuthenticated(true);
+        navigate("/dashboard");
+      } else {
+        setError(data.message || "Login failed");
+      }
+    } catch (err) {
+      setError("Server error: " + err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -87,69 +130,84 @@ function Login() {
       display: "flex",
       justifyContent: "center",
       alignItems: "center",
-      minHeight: "calc(100vh - 64px)",
-      backgroundColor: colors.background,
+      minHeight: "100vh",
+      backgroundColor: colors.bg,
     }}>
       <div style={{
         backgroundColor: colors.surface,
         border: `1px solid ${colors.border}`,
-        borderRadius: "12px",
-        padding: "2rem",
+        borderRadius: radius.lg,
+        padding: spacing.xl,
         width: "100%",
         maxWidth: "400px",
       }}>
-        <h2 style={{ marginBottom: "2rem", color: colors.text }}>Login</h2>
+        <h2 style={{ ...typography.h2, marginBottom: spacing.xl, color: colors.textPrimary }}>Login</h2>
+        {error && <div style={{ color: colors.error, marginBottom: spacing.lg, fontSize: "14px" }}>{error}</div>}
         <form onSubmit={handleLogin}>
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            style={{
-              width: "100%",
-              padding: "0.75rem",
-              marginBottom: "1rem",
-              border: `1px solid ${colors.border}`,
-              borderRadius: "6px",
-              backgroundColor: colors.background,
-              color: colors.text,
-              boxSizing: "border-box",
-            }}
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            style={{
-              width: "100%",
-              padding: "0.75rem",
-              marginBottom: "1rem",
-              border: `1px solid ${colors.border}`,
-              borderRadius: "6px",
-              backgroundColor: colors.background,
-              color: colors.text,
-              boxSizing: "border-box",
-            }}
-          />
+          <div style={{ marginBottom: spacing.lg }}>
+            <label style={{ ...typography.label, color: colors.textSecondary, display: "block", marginBottom: spacing.sm }}>
+              Email
+            </label>
+            <input
+              type="email"
+              placeholder="your@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={loading}
+              style={{
+                width: "100%",
+                padding: spacing.md,
+                border: `1px solid ${colors.border}`,
+                borderRadius: radius.md,
+                backgroundColor: colors.surface,
+                color: colors.textPrimary,
+                boxSizing: "border-box",
+                fontFamily: typography.fontFamily,
+              }}
+            />
+          </div>
+          <div style={{ marginBottom: spacing.xl }}>
+            <label style={{ ...typography.label, color: colors.textSecondary, display: "block", marginBottom: spacing.sm }}>
+              Password
+            </label>
+            <input
+              type="password"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              disabled={loading}
+              style={{
+                width: "100%",
+                padding: spacing.md,
+                border: `1px solid ${colors.border}`,
+                borderRadius: radius.md,
+                backgroundColor: colors.surface,
+                color: colors.textPrimary,
+                boxSizing: "border-box",
+                fontFamily: typography.fontFamily,
+              }}
+            />
+          </div>
           <button
             type="submit"
+            disabled={loading}
             style={{
               width: "100%",
-              padding: "0.75rem",
-              backgroundColor: colors.primary,
+              padding: spacing.md,
+              backgroundColor: loading ? colors.textTertiary : colors.primary,
               color: "white",
               border: "none",
-              borderRadius: "6px",
-              cursor: "pointer",
-              fontWeight: "600",
+              borderRadius: radius.md,
+              cursor: loading ? "not-allowed" : "pointer",
+              fontWeight: 600,
+              fontFamily: typography.fontFamily,
             }}
           >
-            Login
+            {loading ? "Logging in..." : "Login"}
           </button>
         </form>
-        <p style={{ textAlign: "center", marginTop: "1rem", color: colors.textSecondary }}>
-          No account? <span style={{ color: colors.primary, cursor: "pointer", fontWeight: "600" }} onClick={() => navigate("/signup")}>Sign up</span>
+        <p style={{ textAlign: "center", marginTop: spacing.lg, ...typography.body, color: colors.textSecondary }}>
+          No account? <span style={{ color: colors.primary, cursor: "pointer", fontWeight: 600 }} onClick={() => navigate("/signup")}>Sign up</span>
         </p>
       </div>
     </div>
@@ -157,19 +215,46 @@ function Login() {
 }
 
 function Signup() {
-  const { colors } = useTheme();
+  const { colors, spacing, typography, radius } = designSystemV2;
   const navigate = useNavigate();
   const { setIsAuthenticated } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSignup = (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
-    if (email && password && confirmPassword && password === confirmPassword) {
-      localStorage.setItem("authToken", "token_" + Date.now());
-      setIsAuthenticated(true);
-      navigate("/dashboard");
+    setError("");
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await fetch("http://localhost:4000/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        localStorage.setItem("authToken", data.token);
+        setIsAuthenticated(true);
+        navigate("/dashboard");
+      } else {
+        setError(data.message || "Signup failed");
+      }
+    } catch (err) {
+      setError("Server error: " + err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -178,347 +263,182 @@ function Signup() {
       display: "flex",
       justifyContent: "center",
       alignItems: "center",
-      minHeight: "calc(100vh - 64px)",
-      backgroundColor: colors.background,
+      minHeight: "100vh",
+      backgroundColor: colors.bg,
     }}>
       <div style={{
         backgroundColor: colors.surface,
         border: `1px solid ${colors.border}`,
-        borderRadius: "12px",
-        padding: "2rem",
+        borderRadius: radius.lg,
+        padding: spacing.xl,
         width: "100%",
         maxWidth: "400px",
       }}>
-        <h2 style={{ marginBottom: "2rem", color: colors.text }}>Sign Up</h2>
+        <h2 style={{ ...typography.h2, marginBottom: spacing.xl, color: colors.textPrimary }}>Create Account</h2>
+        {error && <div style={{ color: colors.error, marginBottom: spacing.lg, fontSize: "14px" }}>{error}</div>}
         <form onSubmit={handleSignup}>
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            style={{
-              width: "100%",
-              padding: "0.75rem",
-              marginBottom: "1rem",
-              border: `1px solid ${colors.border}`,
-              borderRadius: "6px",
-              backgroundColor: colors.background,
-              color: colors.text,
-              boxSizing: "border-box",
-            }}
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            style={{
-              width: "100%",
-              padding: "0.75rem",
-              marginBottom: "1rem",
-              border: `1px solid ${colors.border}`,
-              borderRadius: "6px",
-              backgroundColor: colors.background,
-              color: colors.text,
-              boxSizing: "border-box",
-            }}
-          />
-          <input
-            type="password"
-            placeholder="Confirm Password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            style={{
-              width: "100%",
-              padding: "0.75rem",
-              marginBottom: "1rem",
-              border: `1px solid ${colors.border}`,
-              borderRadius: "6px",
-              backgroundColor: colors.background,
-              color: colors.text,
-              boxSizing: "border-box",
-            }}
-          />
+          <div style={{ marginBottom: spacing.lg }}>
+            <label style={{ ...typography.label, color: colors.textSecondary, display: "block", marginBottom: spacing.sm }}>
+              Email
+            </label>
+            <input
+              type="email"
+              placeholder="your@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={loading}
+              style={{
+                width: "100%",
+                padding: spacing.md,
+                border: `1px solid ${colors.border}`,
+                borderRadius: radius.md,
+                backgroundColor: colors.surface,
+                color: colors.textPrimary,
+                boxSizing: "border-box",
+                fontFamily: typography.fontFamily,
+              }}
+            />
+          </div>
+          <div style={{ marginBottom: spacing.lg }}>
+            <label style={{ ...typography.label, color: colors.textSecondary, display: "block", marginBottom: spacing.sm }}>
+              Password
+            </label>
+            <input
+              type="password"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              disabled={loading}
+              style={{
+                width: "100%",
+                padding: spacing.md,
+                border: `1px solid ${colors.border}`,
+                borderRadius: radius.md,
+                backgroundColor: colors.surface,
+                color: colors.textPrimary,
+                boxSizing: "border-box",
+                fontFamily: typography.fontFamily,
+              }}
+            />
+          </div>
+          <div style={{ marginBottom: spacing.xl }}>
+            <label style={{ ...typography.label, color: colors.textSecondary, display: "block", marginBottom: spacing.sm }}>
+              Confirm Password
+            </label>
+            <input
+              type="password"
+              placeholder="••••••••"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              disabled={loading}
+              style={{
+                width: "100%",
+                padding: spacing.md,
+                border: `1px solid ${colors.border}`,
+                borderRadius: radius.md,
+                backgroundColor: colors.surface,
+                color: colors.textPrimary,
+                boxSizing: "border-box",
+                fontFamily: typography.fontFamily,
+              }}
+            />
+          </div>
           <button
             type="submit"
+            disabled={loading}
             style={{
               width: "100%",
-              padding: "0.75rem",
-              backgroundColor: colors.primary,
+              padding: spacing.md,
+              backgroundColor: loading ? colors.textTertiary : colors.primary,
               color: "white",
               border: "none",
-              borderRadius: "6px",
-              cursor: "pointer",
-              fontWeight: "600",
+              borderRadius: radius.md,
+              cursor: loading ? "not-allowed" : "pointer",
+              fontWeight: 600,
+              fontFamily: typography.fontFamily,
             }}
           >
-            Sign Up
+            {loading ? "Creating account..." : "Sign Up"}
           </button>
         </form>
-        <p style={{ textAlign: "center", marginTop: "1rem", color: colors.textSecondary }}>
-          Have account? <span style={{ color: colors.primary, cursor: "pointer", fontWeight: "600" }} onClick={() => navigate("/login")}>Login</span>
+        <p style={{ textAlign: "center", marginTop: spacing.lg, ...typography.body, color: colors.textSecondary }}>
+          Have account? <span style={{ color: colors.primary, cursor: "pointer", fontWeight: 600 }} onClick={() => navigate("/login")}>Login</span>
         </p>
       </div>
     </div>
   );
 }
 
-function Holdings() {
-  const { colors } = useTheme();
-  const [holdings, setHoldings] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  React.useEffect(() => {
-    hybridHoldingsAPI.getAll().then((data) => {
-      if (data.success) setHoldings(data.data);
-      setLoading(false);
-    });
-  }, []);
-
-  if (loading) return <div style={{ padding: "2rem" }}>Loading...</div>;
-
-  const tableStyle = { width: "100%", borderCollapse: "collapse", marginTop: "1rem" };
-  const cellStyle = { padding: "1rem", textAlign: "left", borderBottom: `1px solid ${colors.border}` };
-
-  return (
-    <div style={{ backgroundColor: colors.background, minHeight: "calc(100vh - 64px)", padding: "2rem" }}>
-      <h1 style={{ color: colors.text, marginBottom: "2rem" }}>Holdings</h1>
-      <div style={{ backgroundColor: colors.surface, borderRadius: "12px", border: `1px solid ${colors.border}`, overflow: "auto" }}>
-        <table style={tableStyle}>
-          <thead style={{ backgroundColor: colors.surfaceLight }}>
-            <tr>
-              <th style={cellStyle}>Stock</th>
-              <th style={cellStyle}>Qty</th>
-              <th style={cellStyle}>Avg</th>
-              <th style={cellStyle}>Price</th>
-              <th style={cellStyle}>Gain/Loss</th>
-            </tr>
-          </thead>
-          <tbody>
-            {holdings.map((h) => (
-              <tr key={h._id}>
-                <td style={cellStyle}><strong>{h.name}</strong></td>
-                <td style={cellStyle}>{h.qty}</td>
-                <td style={cellStyle}>₹{h.avg}</td>
-                <td style={cellStyle}>₹{h.price}</td>
-                <td style={{ ...cellStyle, color: (h.price - h.avg) >= 0 ? colors.success : colors.danger }}>
-                  {(h.price - h.avg) >= 0 ? "+" : ""}₹{(h.price - h.avg).toFixed(2)}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-}
-
-function Orders() {
-  const { colors } = useTheme();
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  React.useEffect(() => {
-    hybridOrdersAPI.getAll().then((data) => {
-      if (data.success) setOrders(data.data);
-      setLoading(false);
-    });
-  }, []);
-
-  if (loading) return <div style={{ padding: "2rem" }}>Loading...</div>;
-
-  const tableStyle = { width: "100%", borderCollapse: "collapse", marginTop: "1rem" };
-  const cellStyle = { padding: "1rem", textAlign: "left", borderBottom: `1px solid ${colors.border}` };
-
-  return (
-    <div style={{ backgroundColor: colors.background, minHeight: "calc(100vh - 64px)", padding: "2rem" }}>
-      <h1 style={{ color: colors.text, marginBottom: "2rem" }}>Orders</h1>
-      <div style={{ backgroundColor: colors.surface, borderRadius: "12px", border: `1px solid ${colors.border}`, overflow: "auto" }}>
-        <table style={tableStyle}>
-          <thead style={{ backgroundColor: colors.surfaceLight }}>
-            <tr>
-              <th style={cellStyle}>Stock</th>
-              <th style={cellStyle}>Type</th>
-              <th style={cellStyle}>Qty</th>
-              <th style={cellStyle}>Price</th>
-              <th style={cellStyle}>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {orders.map((o) => (
-              <tr key={o._id}>
-                <td style={cellStyle}><strong>{o.name}</strong></td>
-                <td style={{ ...cellStyle, color: o.mode === "BUY" ? colors.success : colors.danger }}>{o.mode}</td>
-                <td style={cellStyle}>{o.qty}</td>
-                <td style={cellStyle}>₹{o.price}</td>
-                <td style={cellStyle}>
-                  <span style={{ backgroundColor: o.status === "COMPLETED" ? colors.success : colors.warning, color: "white", padding: "0.25rem 0.75rem", borderRadius: "4px" }}>
-                    {o.status}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-}
-
-function Positions() {
-  const { colors } = useTheme();
-  const [positions, setPositions] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  React.useEffect(() => {
-    hybridPositionsAPI.getAll().then((data) => {
-      if (data.success) setPositions(data.data);
-      setLoading(false);
-    });
-  }, []);
-
-  if (loading) return <div style={{ padding: "2rem" }}>Loading...</div>;
-
-  return (
-    <div style={{ backgroundColor: colors.background, minHeight: "calc(100vh - 64px)", padding: "2rem" }}>
-      <h1 style={{ color: colors.text, marginBottom: "2rem" }}>Positions</h1>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "1.5rem" }}>
-        {positions.map((p) => (
-          <div key={p._id} style={{ backgroundColor: colors.surface, border: `1px solid ${colors.border}`, borderRadius: "12px", padding: "1.5rem" }}>
-            <h3 style={{ color: colors.text, marginBottom: "1rem" }}>{p.name}</h3>
-            <div style={{ color: colors.textSecondary, marginBottom: "0.5rem" }}>Product: <strong>{p.product}</strong></div>
-            <div style={{ color: colors.text, marginBottom: "1rem" }}>
-              <div>Qty: {p.qty}</div>
-              <div>Avg: ₹{p.avg}</div>
-              <div>Price: ₹{p.price}</div>
-            </div>
-            <div style={{ color: p.isLoss ? colors.danger : colors.success, fontWeight: "600" }}>
-              {p.net} ({p.day})
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 const AppContent = () => {
-  const { colors } = useTheme();
+  const { isDark, toggleTheme } = useTheme();
   const { isAuthenticated, logout } = useAuth();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const location = useLocation();
+
+  const isAuthPage = location.pathname === "/" || location.pathname === "/login" || location.pathname === "/signup";
 
   return (
-    <div style={{ backgroundColor: colors.background, color: colors.text, minHeight: "100vh" }}>
-      <Navbar isAuthenticated={isAuthenticated} onLogout={logout} />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-        <Route path="/holdings" element={<ProtectedRoute><Holdings /></ProtectedRoute>} />
-        <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
-        <Route path="/positions" element={<ProtectedRoute><Positions /></ProtectedRoute>} />
-        <Route path="/watchlist" element={<ProtectedRoute><Watchlist /></ProtectedRoute>} />
-        <Route path="/search" element={<ProtectedRoute><StockSearch /></ProtectedRoute>} />
-        <Route path="/analytics" element={<ProtectedRoute><PortfolioAnalytics /></ProtectedRoute>} />
-              <Route
-          path="/screener"
-          element={
-            <ProtectedRoute>
-              <StockScreener />
-            </ProtectedRoute>
-          }
+    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+      {isAuthenticated && !isAuthPage && (
+        <NavbarV2
+          isAuthenticated={isAuthenticated}
+          onLogout={logout}
+          isDarkMode={isDark}
+          onToggleDarkMode={toggleTheme}
+          onMenuClick={() => setSidebarOpen(!sidebarOpen)}
         />
-              <Route
-          path="/benchmark"
-          element={
-            <ProtectedRoute>
-              <BenchmarkComparison />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/ai-assistant"
-          element={
-            <ProtectedRoute>
-              <AITradingAssistant />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-  path="/prices"
-  element={
-    <ProtectedRoute>
-      <RealTimePrices />
-    </ProtectedRoute>
-  }
-/>
-<Route
-  path="/indicators"
-  element={
-    <ProtectedRoute>
-      <TechnicalIndicators />
-    </ProtectedRoute>
-  }
-/>
-<Route
-  path="/advanced-orders"
-  element={
-    <ProtectedRoute>
-      <AdvancedOrders />
-    </ProtectedRoute>
-  }
-/>
-<Route
-  path="/profile"
-  element={
-    <ProtectedRoute>
-      <UserProfile />
-    </ProtectedRoute>
-  }
-/>
-<Route
-  path="/leaderboard"
-  element={
-    <ProtectedRoute>
-      <Leaderboard />
-    </ProtectedRoute>
-  }
-/>
-<Route
-  path="/notifications"
-  element={
-    <ProtectedRoute>
-      <Notifications />
-    </ProtectedRoute>
-  }
-/>
-<Route
-  path="/paper-trading"
-  element={
-    <ProtectedRoute>
-      <PaperTrading />
-    </ProtectedRoute>
-  }
-/>
-<Route
-  path="/ai-recommendations"
-  element={
-    <ProtectedRoute>
-      <AIRecommendations />
-    </ProtectedRoute>
-  }
-  />
-  <Route
-  path="/multi-agent-trading"
-  element={
-    <ProtectedRoute>
-      <MultiAgentTrading />
-    </ProtectedRoute>
-  }
+      )}
 
-/>
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+      <div style={{
+        display: "flex",
+        flex: 1,
+        width: "100%",
+        position: "relative",
+        overflow: "hidden",
+        backgroundColor: "#F7F8FA",
+      }}>
+        {isAuthenticated && !isAuthPage && (
+          <SidebarV2 
+            isOpen={sidebarOpen} 
+            onClose={() => setSidebarOpen(false)}
+            className={sidebarOpen ? "sidebar-open" : ""}
+          />
+        )}
+
+        <main style={{
+          flex: 1,
+          width: "100%",
+          overflow: "auto",
+          position: "relative",
+          zIndex: 1,
+        }}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/dashboard" element={<ProtectedRoute><DashboardV2Professional /></ProtectedRoute>} />
+            <Route path="/holdings" element={<ProtectedRoute><HoldingsV2 /></ProtectedRoute>} />
+            <Route path="/orders" element={<ProtectedRoute><OrdersV2 /></ProtectedRoute>} />
+            <Route path="/positions" element={<ProtectedRoute><PaperTrading /></ProtectedRoute>} />
+            <Route path="/watchlist" element={<ProtectedRoute><WatchList /></ProtectedRoute>} />
+            <Route path="/search" element={<ProtectedRoute><StockSearch /></ProtectedRoute>} />
+            <Route path="/analytics" element={<ProtectedRoute><AnalyticsV2 /></ProtectedRoute>} />
+            <Route path="/screener" element={<ProtectedRoute><ScreenerV2 /></ProtectedRoute>} />
+            <Route path="/benchmark" element={<ProtectedRoute><BenchmarkComparison /></ProtectedRoute>} />
+            <Route path="/ai-assistant" element={<ProtectedRoute><AITradingAssistant /></ProtectedRoute>} />
+            <Route path="/prices" element={<ProtectedRoute><RealTimePrices /></ProtectedRoute>} />
+            <Route path="/indicators" element={<ProtectedRoute><TechnicalIndicators /></ProtectedRoute>} />
+            <Route path="/advanced-orders" element={<ProtectedRoute><AdvancedOrders /></ProtectedRoute>} />
+            <Route path="/profile" element={<ProtectedRoute><ProfileV2 /></ProtectedRoute>} />
+            <Route path="/leaderboard" element={<ProtectedRoute><Leaderboard /></ProtectedRoute>} />
+            <Route path="/notifications" element={<ProtectedRoute><NotificationsV2 /></ProtectedRoute>} />
+            <Route path="/paper-trading" element={<ProtectedRoute><PaperTrading /></ProtectedRoute>} />
+            <Route path="/ai-recommendations" element={<ProtectedRoute><AIRecommendations /></ProtectedRoute>} />
+            <Route path="/multi-agent-trading" element={<ProtectedRoute><MultiAgentTrading /></ProtectedRoute>} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </main>
+      </div>
     </div>
   );
 };
@@ -533,4 +453,4 @@ export default function App() {
       </AuthProvider>
     </ThemeProvider>
   );
-} 
+}

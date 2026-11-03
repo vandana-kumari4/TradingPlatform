@@ -1,3 +1,6 @@
+const dns = require("dns");
+dns.setServers(["8.8.8.8", "1.1.1.1"]);
+
 require("dotenv").config();
 
 const express = require("express");
@@ -18,6 +21,7 @@ const notificationsRouter = require("./routes/notifications");
 const paperTradingRouter = require("./routes/paperTrading");
 const aiRecommendationsRouter = require("./routes/aiRecommendations");
 const multiAgentTradingRouter = require("./routes/multiAgentTrading");
+
 const PORT = process.env.PORT || 4000;
 const uri = process.env.MONGO_URL;
 
@@ -65,6 +69,7 @@ io.on("connection", (socket) => {
   });
 });
 
+// API Endpoints
 app.get("/allHoldings", async (req, res) => {
   try {
     let allHoldings = await HoldingsModel.find({});
@@ -100,9 +105,6 @@ app.post("/newOrder", async (req, res) => {
 });
 
 // API Routes
-const multiAgentTradingRouter = require("./routes/multiAgentTrading");
-
-// API Routes
 app.use("/api/auth", authRouter);
 app.use("/api/chat", chatRouter);
 app.use("/api/notifications", notificationsRouter);
@@ -110,9 +112,21 @@ app.use("/api/paper-trading", paperTradingRouter);
 app.use("/api/ai-recommendations", aiRecommendationsRouter);
 app.use("/api/multi-agent-trading", multiAgentTradingRouter);
 
+// Health check
+app.get("/", (req, res) => {
+  res.json({ message: "MarketMastery Backend API Running!" });
+});
+
+// Error handling
+app.use((err, req, res, next) => {
+  console.error("Error:", err);
+  res.status(500).json({ error: err.message });
+});
+
 server.listen(PORT, () => {
   console.log(`App started on port ${PORT}!`);
-  mongoose.connect(uri).catch((err) => {
-    console.log("MongoDB connection error (non-critical):", err.message);
-  });
+  mongoose
+    .connect(uri, { serverSelectionTimeoutMS: 15000 })
+    .then(() => console.log("MongoDB connected"))
+    .catch((err) => console.error("MongoDB connection error:", err.message));
 });

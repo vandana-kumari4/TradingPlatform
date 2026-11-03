@@ -8,19 +8,30 @@ const router = express.Router();
 // Signup
 router.post("/signup", async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { email, password } = req.body;
+
+    // Validation
+    if (!email || !password) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Email and password are required" 
+      });
+    }
 
     // Check if user exists
     const existingUser = await UserModel.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ error: "User already exists" });
+      return res.status(400).json({ 
+        success: false, 
+        message: "User already exists" 
+      });
     }
 
     // Create new user
     const newUser = new UserModel({
-      name,
+      name: email.split("@")[0],
       email,
-      password, // In production, hash this with bcrypt
+      password,
     });
 
     await newUser.save();
@@ -43,7 +54,10 @@ router.post("/signup", async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ 
+      success: false, 
+      message: error.message 
+    });
   }
 });
 
@@ -52,15 +66,29 @@ router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    // Validation
+    if (!email || !password) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Email and password are required" 
+      });
+    }
+
     // Check if user exists
     const user = await UserModel.findOne({ email });
     if (!user) {
-      return res.status(400).json({ error: "User not found" });
+      return res.status(400).json({ 
+        success: false, 
+        message: "User not found" 
+      });
     }
 
     // Check password (in production, use bcrypt.compare)
     if (user.password !== password) {
-      return res.status(400).json({ error: "Incorrect password" });
+      return res.status(400).json({ 
+        success: false, 
+        message: "Incorrect password" 
+      });
     }
 
     // Generate JWT token
@@ -78,12 +106,15 @@ router.post("/login", async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        avatar: user.avatar,
-        portfolio: user.portfolio,
+        avatar: user.avatar || null,
+        portfolio: user.portfolio || {},
       },
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ 
+      success: false, 
+      message: error.message 
+    });
   }
 });
 
@@ -92,7 +123,10 @@ router.get("/profile/:userId", async (req, res) => {
   try {
     const user = await UserModel.findById(req.params.userId);
     if (!user) {
-      return res.status(404).json({ error: "User not found" });
+      return res.status(404).json({ 
+        success: false, 
+        message: "User not found" 
+      });
     }
 
     res.json({
@@ -101,16 +135,19 @@ router.get("/profile/:userId", async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        phone: user.phone,
-        bio: user.bio,
-        avatar: user.avatar,
-        city: user.city,
-        portfolio: user.portfolio,
+        phone: user.phone || null,
+        bio: user.bio || null,
+        avatar: user.avatar || null,
+        city: user.city || null,
+        portfolio: user.portfolio || {},
         createdAt: user.createdAt,
       },
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ 
+      success: false, 
+      message: error.message 
+    });
   }
 });
 
@@ -131,7 +168,10 @@ router.put("/profile/:userId", async (req, res) => {
       user,
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ 
+      success: false, 
+      message: error.message 
+    });
   }
 });
 
@@ -148,7 +188,10 @@ router.get("/leaderboard", async (req, res) => {
       leaderboard: topTraders,
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ 
+      success: false, 
+      message: error.message 
+    });
   }
 });
 
